@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kisan AI - Advice</title>
+    <link rel="stylesheet" href="../shared/style.css">
+    <script src="../shared/config.js"></script>
+    <script src="../shared/api-client.js"></script>
+    <script src="../shared/translations.js"></script>
+    <script src="../shared/language-manager.js"></script>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-brand">
+            <a href="../index.html" style="display: flex; align-items: center; gap: 12px;">
+                <img src="../shared/assets/icon.png" alt="FarmX logo">
+                <h3>Kisan AI</h3>
+            </a>
+        </div>
+        <nav class="header-nav">
+            <button class="nav-icon-btn" onclick="window.history.back()"><span
+                    style="font-size: 1.2rem;">⬅️</span></button>
+        </nav>
+    </header>
+
+    <div class="container">
+
+        <div style="text-align: center; margin-bottom: 24px;">
+            <h1 style="color: var(--primary); margin-bottom: 8px;" data-i18n="advice_title">Expert Advice</h1>
+            <p style="color: var(--text-secondary);" data-i18n="advice_subtitle">Personalized recommendations based on
+                your crop and soil health.
+            </p>
+        </div>
+
+        <div id="loadingState" style="text-align: center; margin-top: 40px;">
+            <p style="color: var(--text-secondary);" data-i18n="loading_advice">Retrieving your farm data...</p>
+        </div>
+
+        <!-- Missing Data Alert -->
+        <div id="missingDataCard" class="card"
+            style="display: none; border-left: 5px solid var(--accent); max-width: 600px; margin: 0 auto;">
+            <h3 style="color: var(--accent); margin-bottom: 12px;" data-i18n="incomplete_data">Complete Your Profile
+            </h3>
+            <p style="margin-bottom: 20px;" data-i18n="incomplete_msg">To generate personalized advice, we need recent
+                data on your crop health and
+                soil type.</p>
+
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                <a id="btnDisease" href="../disease/index.html" class="btn-primary"
+                    style="flex: 1; background: #e74c3c; display: none;" data-i18n="btn_scan_disease">
+                    Scan for Disease
+                </a>
+                <a id="btnSoil" href="../fertilizer/index.html" class="btn-primary"
+                    style="flex: 1; background: #f39c12; display: none;" data-i18n="btn_check_soil">
+                    Check Soil Type
+                </a>
+            </div>
+        </div>
+
+        <!-- Advice Content -->
+        <div id="adviceContent" style="display: none; max-width: 800px; margin: 0 auto;">
+
+            <!-- Context Tags -->
+            <div style="display: flex; gap: 10px; margin-bottom: 16px; justify-content: center;">
+                <span id="tagDisease"
+                    style="background: #ffebee; color: #c62828; padding: 6px 12px; border-radius: 20px; font-weight: 500; font-size: 0.9rem;">Leaf
+                    Spot</span>
+                <span id="tagSoil"
+                    style="background: #fff3e0; color: #ef6c00; padding: 6px 12px; border-radius: 20px; font-weight: 500; font-size: 0.9rem;">Clay
+                    Soil</span>
+            </div>
+
+            <!-- Holistic Advice Card -->
+            <div class="card" style="border-left: 5px solid var(--primary); margin-bottom: 16px;">
+                <h3 style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px; color: var(--primary);">
+                    <span>🌿</span> <span data-i18n="advice_general">General Advice</span>
+                </h3>
+                <p id="adviceText" style="line-height: 1.6; color: var(--text-main); margin-bottom: 0;">
+                    <!-- General Advice Here -->
+                </p>
+            </div>
+
+            <!-- Watering Advice Card -->
+            <div class="card" style="border-left: 5px solid #3498db; margin-bottom: 16px;">
+                <h3 style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px; color: #2980b9;">
+                    <span>💧</span> <span data-i18n="advice_water">Watering Plan</span>
+                </h3>
+                <p id="wateringText" style="line-height: 1.6; color: var(--text-main); margin-bottom: 0;">
+                    <!-- Watering Advice Here -->
+                </p>
+            </div>
+
+            <!-- Fertilizer Advice Card -->
+            <div class="card" style="border-left: 5px solid #f1c40f; margin-bottom: 16px;">
+                <h3 style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px; color: #d35400;">
+                    <span>🧪</span> <span data-i18n="advice_fertilizer">Fertilizer Recommendations</span>
+                </h3>
+                <p id="fertilizerText" style="line-height: 1.6; color: var(--text-main); margin-bottom: 0;">
+                    <!-- Fertilizer Advice Here -->
+                </p>
+            </div>
+
+        </div>
+
+        <p id="errorMessage" style="color: red; text-align: center; display: none; margin-top: 20px;"></p>
+
+    </div>
+
+    <!-- Bottom Navigation -->
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            SessionManager.requireAuth();
+            const user = SessionManager.getUser();
+
+            if (!user) return; // Auth redirect handles this, but safety check
+
+            const loading = document.getElementById('loadingState');
+            const missingCard = document.getElementById('missingDataCard');
+            const adviceContent = document.getElementById('adviceContent');
+            const errorEl = document.getElementById('errorMessage');
+
+            try {
+                // Determine location
+                let lat = null;
+                let lon = null;
+
+                if (navigator.geolocation) {
+                    try {
+                        const position = await new Promise((resolve, reject) => {
+                            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+                        });
+                        lat = position.coords.latitude;
+                        lon = position.coords.longitude;
+                        console.log(`Advice Location: ${lat}, ${lon}`);
+                    } catch (e) {
+                        console.log("Location not available for advice, using default.");
+                    }
+                }
+
+                const data = await KisanAIApi.getUserAdvice(user.id, lat, lon);
+
+                loading.style.display = 'none';
+
+                if (data.status === 'incomplete') {
+                    missingCard.style.display = 'block';
+
+                    if (data.missing.includes('disease')) {
+                        document.getElementById('btnDisease').style.display = 'flex';
+                    }
+                    if (data.missing.includes('soil')) {
+                        document.getElementById('btnSoil').style.display = 'flex';
+                    }
+                } else {
+                    adviceContent.style.display = 'block';
+
+                    document.getElementById('tagDisease').textContent = data.disease;
+                    document.getElementById('tagSoil').textContent = data.soil;
+
+                    // Style tags based on content
+                    if (data.disease.toLowerCase() === 'healthy') {
+                        document.getElementById('tagDisease').style.background = '#e8f5e9';
+                        document.getElementById('tagDisease').style.color = '#2e7d32';
+                    }
+
+                    // Show Used Weather Context (Optional but helpful debug/info)
+                    // You could add a small pill tag showing the weather used
+
+                    // Populate new structured fields
+                    document.getElementById('adviceText').textContent = data.advice;
+                    document.getElementById('wateringText').textContent = data.watering_advice;
+                    document.getElementById('fertilizerText').textContent = data.fertilizers_advice;
+                }
+
+            } catch (error) {
+                console.error(error);
+                loading.style.display = 'none';
+                errorEl.textContent = "Unable to load advice. Please try again later.";
+                errorEl.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+
+</html>

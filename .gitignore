@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+*.env
+
+# Android
+.gradle/
+local.properties
+.idea/
+build/
+app/build/
+*.iml
+*.DS_Store
+
+# Misc
+.vscode/
+node_modules/
+backend-server/database/farmx.db

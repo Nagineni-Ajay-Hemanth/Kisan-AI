@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kisan AI - Disease Detection</title>
+    <link rel="stylesheet" href="../shared/style.css">
+    <script src="../shared/config.js"></script>
+    <script src="../shared/api-client.js"></script>
+    <script src="../shared/translations.js"></script>
+    <script src="../shared/language-manager.js"></script>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-brand">
+            <a href="../index.html" style="display: flex; align-items: center; gap: 12px;">
+                <img src="../shared/assets/icon.png" alt="FarmX logo">
+                <h3>Kisan AI</h3>
+            </a>
+        </div>
+        <nav class="header-nav">
+            <button class="nav-icon-btn" onclick="window.history.back()"><span
+                    style="font-size: 1.2rem;">⬅️</span></button>
+        </nav>
+    </header>
+
+    <div class="container">
+
+        <div style="text-align: center; margin-bottom: 24px;">
+            <h1 style="color: var(--primary); margin-bottom: 8px;">Disease Detection</h1>
+            <p style="color: var(--text-secondary);">Upload a photo of your crop to instantly identify diseases and get
+                treatment advice.</p>
+        </div>
+
+        <div class="card" style="max-width: 500px; margin: 0 auto; text-align: center;">
+
+            <!-- Scan Area -->
+            <div id="scanArea" onclick="triggerUpload()"
+                style="border: 2px dashed #a5d6a7; border-radius: var(--radius-md); height: 250px; display: flex; align-items: center; justify-content: center; background: #f1f8e9; cursor: pointer; overflow: hidden; position: relative;">
+
+                <div id="scanPlaceholder">
+                    <span style="font-size: 3rem; display: block; margin-bottom: 8px;">📷</span>
+                    <span style="font-weight: 600; color: var(--primary);">Tap to Upload Image</span>
+                </div>
+
+                <img id="imagePreview" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: center;">
+                <button onclick="triggerCamera()" class="btn-primary" style="flex: 1;">
+                    📸 Camera
+                </button>
+                <button onclick="triggerUpload()" class="btn-secondary" style="flex: 1;">
+                    🖼️ Gallery
+                </button>
+            </div>
+
+            <!-- Analyze Button (Hidden initially) -->
+            <button id="btnAnalyze" class="btn-primary" onclick="analyzeImage()"
+                style="margin-top: 16px; background: var(--accent); color: var(--text-main); display: none;">
+                🔍 Analyze Crop
+            </button>
+
+            <!-- Loading State -->
+            <div id="loadingState" style="display: none; margin-top: 20px;">
+                <p style="font-weight: 600; color: var(--primary);">Analyzing crop...</p>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">Please wait a moment</p>
+            </div>
+
+            <!-- Result Display -->
+            <div id="resultCard"
+                style="display: none; margin-top: 24px; background: #e8f5e9; padding: 20px; border-radius: var(--radius-sm); border-left: 5px solid var(--primary);">
+                <h3 id="resultDisease" style="margin-bottom: 4px;">Detected: Leaf Blight</h3>
+                <p id="resultConfidence" style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px;">
+                    Confidence: 98%</p>
+
+                <a href="../advice/index.html" class="btn-primary" style="padding: 10px; font-size: 0.9rem;">
+                    View Treatment Advice
+                </a>
+            </div>
+
+            <p id="errorMessage" style="color: red; margin-top: 15px; display: none;"></p>
+        </div>
+
+        <!-- Hidden Inputs -->
+        <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;"
+            onchange="handleFileSelect(event)">
+
+    </div>
+
+
+
+    <script>
+        let selectedFile = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            SessionManager.requireAuth();
+        });
+
+        function triggerUpload() {
+            document.getElementById('fileInput').click();
+        }
+
+        function triggerCamera() {
+            document.getElementById('cameraInput').click();
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            selectedFile = file;
+
+            // Show Preview
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('scanPlaceholder').style.display = 'none';
+                const img = document.getElementById('imagePreview');
+                img.src = e.target.result;
+                img.style.display = 'block';
+
+                // Show Analyze button
+                document.getElementById('btnAnalyze').style.display = 'flex';
+                document.getElementById('resultCard').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+
+        async function analyzeImage() {
+            if (!selectedFile) return;
+
+            const user = SessionManager.getUser();
+            if (!user) {
+                alert("Please login first.");
+                return;
+            }
+
+            const loading = document.getElementById('loadingState');
+            const resultCard = document.getElementById('resultCard');
+            const errorEl = document.getElementById('errorMessage');
+            const btnAnalyze = document.getElementById('btnAnalyze');
+
+            loading.style.display = 'block';
+            resultCard.style.display = 'none';
+            errorEl.style.display = 'none';
+            btnAnalyze.disabled = true;
+
+            try {
+                const data = await KisanAIApi.predictDisease(selectedFile, user.id);
+
+                if (data.error) throw new Error(data.error);
+
+                document.getElementById('resultDisease').textContent = `Detected: ${data.disease}`;
+                document.getElementById('resultConfidence').textContent = `Confidence: ${(data.confidence * 100).toFixed(1)}%`;
+
+                resultCard.style.display = 'block';
+
+            } catch (error) {
+                console.error(error);
+                errorEl.textContent = "Error: " + error.message;
+                errorEl.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                btnAnalyze.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>

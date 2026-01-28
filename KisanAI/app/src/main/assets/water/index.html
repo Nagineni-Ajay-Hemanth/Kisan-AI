@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kisan AI - Water Planning</title>
+    <link rel="stylesheet" href="../shared/style.css">
+    <script src="../shared/auth-guard.js"></script>
+    <script src="../shared/language-manager.js"></script>
+    <script src="../shared/translations.js"></script>
+
+    <style>
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 24px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-brand">
+            <a href="../index.html" style="display: flex; align-items: center; gap: 12px;">
+                <img src="../shared/assets/icon.png" alt="Kisan AI logo">
+                <h3>Kisan AI</h3>
+            </a>
+        </div>
+        <nav class="header-nav">
+            <button class="nav-icon-btn" onclick="window.history.back()"><span
+                    style="font-size: 1.2rem;">⬅️</span></button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <h1 style="color: #0288d1; margin-bottom: 8px;" data-i18n="water_title">Smart Irrigation</h1>
+            <p style="color: var(--text-secondary);" data-i18n="water_subtitle">Plan water usage based on soil and crop
+                health.</p>
+        </div>
+
+        <div class="card">
+            <div class="form-group">
+                <label class="form-label" data-i18n="water_crop">Crop Type</label>
+                <select class="form-select" id="cropType">
+                    <option value="wheat">Wheat</option>
+                    <option value="rice">Rice (Paddy)</option>
+                    <option value="cotton">Cotton</option>
+                    <option value="sugarcane">Sugarcane</option>
+                    <option value="tomato">Tomato</option>
+                    <option value="maize">Maize</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" data-i18n="water_age">Values (Days since sowing)</label>
+                <input type="number" class="form-select" id="cropAge" placeholder="e.g. 45" min="1" max="180">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" data-i18n="water_soil">Soil Type</label>
+                <select class="form-select" id="soilType">
+                    <option value="loamy">Loamy Soil (Ideal)</option>
+                    <option value="clay">Clay Soil (Holds Water)</option>
+                    <option value="sandy">Sandy Soil (Drains Fast)</option>
+                    <option value="black">Black Soil</option>
+                    <option value="red">Red Soil</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" data-i18n="water_rain">Recent Rainfall (Last 2 days)</label>
+                <select class="form-select" id="rainStatus">
+                    <option value="0">No Rain</option>
+                    <option value="5">Light Rain (< 5mm)</option>
+                    <option value="15">Moderate Rain (10-20mm)</option>
+                    <option value="50">Heavy Rain (> 50mm)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" data-i18n="water_method">Irrigation Method</label>
+                <select class="form-select" id="irrigationMethod">
+                    <option value="flood">Flood / Furrow</option>
+                    <option value="drip">Drip Irrigation</option>
+                    <option value="sprinkler">Sprinkler</option>
+                </select>
+            </div>
+
+            <button class="btn-primary" onclick="generateAdvancedPlan()" data-i18n="water_btn">Calculate Water
+                Need</button>
+        </div>
+
+        <!-- Result Section -->
+        <div id="resultCard" class="result-card">
+            <div style="font-size: 3rem; margin-bottom: 12px;">💧</div>
+            <h3 id="planTitle" style="color: #01579b; margin-bottom: 8px;" data-i18n="water_result_title">Recommendation
+            </h3>
+
+            <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <p style="color: #555; font-size: 0.9rem; margin-bottom: 4px;" data-i18n="water_net_req">Net Water
+                    Required today</p>
+                <strong id="waterAmount" style="font-size: 1.6rem; color: #0277bd;">0 Liters</strong>
+                <p style="font-size: 0.8rem; color: #777;">per acre</p>
+            </div>
+
+            <p id="planDesc" style="color: #0277bd; font-size: 1.1rem; font-weight: 500;"></p>
+            <div id="planTips"
+                style="margin-top: 16px; text-align: left; background: rgba(255,255,255,0.6); padding: 12px; border-radius: 8px; font-size: 0.95rem; color: #333;">
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function generateAdvancedPlan() {
+            const crop = document.getElementById('cropType').value;
+            const age = parseInt(document.getElementById('cropAge').value) || 30;
+            const soil = document.getElementById('soilType').value;
+            const rain = parseInt(document.getElementById('rainStatus').value);
+            const method = document.getElementById('irrigationMethod').value;
+
+            // --- CONSTANTS & MODEL ---
+            const ET0 = 5.0; // Reference Evapotranspiration (mm/day) - Avg for India season
+
+            // Kc (Crop Coefficient) Curves
+            // Simplified: Init=0.4, Dev=0.8, Mid=1.1, Late=0.6
+            let Kc = 0.5;
+            if (age < 20) Kc = 0.4;
+            else if (age < 50) Kc = 0.8;
+            else if (age < 90) Kc = 1.15; // Peak
+            else Kc = 0.6;
+
+            // Crop specific adjustments
+            if (crop === 'sugarcane' || crop === 'rice') Kc *= 1.2;
+
+            // Calculate Gross Water Need (mm)
+            let waterNeedMM = (ET0 * Kc) - (rain * 0.8); // 80% effective rain
+            if (waterNeedMM < 0) waterNeedMM = 0;
+
+            // Convert mm to Liters per Acre
+            // 1 mm = 1 liter/m2. 1 Acre ~= 4046 m2.
+            let litersPerAcre = Math.round(waterNeedMM * 4046);
+
+            // Efficiency Factor
+            let efficiency = 0.6; // Flood
+            if (method === 'drip') efficiency = 0.9;
+            if (method === 'sprinkler') efficiency = 0.75;
+
+            // Gross Application Requirement
+            let grossLiters = Math.round(litersPerAcre / efficiency);
+
+            // --- GENERATE OUTPUT ---
+            let title = "";
+            let desc = "";
+            let tips = [];
+
+            if (rain > 20) {
+                title = "No Irrigation Needed";
+                desc = "Recent rainfall is sufficient. Ensure good drainage.";
+                grossLiters = 0;
+            } else if (grossLiters === 0) {
+                title = "Soil Moisture Adequate";
+                desc = "No water required today.";
+            } else {
+                title = "Irrigation Recommended";
+
+                // Method specific advice
+                if (method === 'drip') {
+                    // Drip usually runs in minutes/hours
+                    // Avg drip discharge ~ 10,000 L/hr/acre (depends on hardware, assuming standard)
+                    let mins = Math.round((grossLiters / 12000) * 60);
+                    if (mins < 20) mins = 20;
+                    desc = `Run drip system for approx <b>${mins} - ${mins + 15} minutes</b> today.`;
+                } else {
+                    desc = `Apply irrigation to replenish moisture.`;
+                }
+            }
+
+            // Soil specific tips
+            if (soil === 'sandy') tips.push("Sandy soil: Split this amount into two shifts (Morning/Evening) to reduce leaching.");
+            if (soil === 'clay') tips.push("Clay soil: Ensure no water logging. Water slowly.");
+
+            // Crop specific tips
+            if (crop === 'rice') {
+                desc = "Maintain 2-5cm standing water level.";
+                grossLiters = "saturation"; // Override for paddy
+                tips.push("Paddy needs continuous saturation. Adjust inlet based on level.");
+            }
+
+            // Render
+            document.getElementById('planTitle').innerText = title;
+            document.getElementById('planDesc').innerHTML = desc;
+
+            if (typeof grossLiters === 'number') {
+                document.getElementById('waterAmount').innerText = grossLiters.toLocaleString() + " Liters";
+            } else {
+                document.getElementById('waterAmount').innerText = "Saturation";
+            }
+
+            let tipsHtml = "<strong>Expert Tips:</strong><ul style='margin-top:4px; padding-left: 20px;'>";
+            tips.forEach(t => tipsHtml += `<li>${t}</li>`);
+            tipsHtml += "</ul>";
+
+            document.getElementById('planTips').innerHTML = tipsHtml;
+            document.getElementById('resultCard').style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
