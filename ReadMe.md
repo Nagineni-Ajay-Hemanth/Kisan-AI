@@ -116,7 +116,6 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 |:---:|:---:|:---:|
 | ![Dashboard](https://placehold.co/200x400/2ecc71/ffffff?text=Dashboard) | ![Disease](https://placehold.co/200x400/e74c3c/ffffff?text=Scan) | ![Advice](https://placehold.co/200x400/3498db/ffffff?text=Advice) |
 
-*(Replace with actual screenshots of your app)*
 
 ---
 
