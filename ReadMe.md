@@ -20,7 +20,7 @@
 
 ## 📖 About The Project
 
-**Kisan AI** (also known as FarmX) is a comprehensive digital assistant designed to revolutionize modern farming. By leveraging **Deep Learning** and **IoT-ready** architecture, it helps farmers detect crop diseases early, analyze soil health, and receive personalized agricultural advice in their local language.
+**Kisan AI** (also known as FarmX) is a comprehensive digital assistant designed to revolutionize modern farming. By leveraging **Deep Learning** architecture, it helps farmers detect crop diseases early, analyze soil health, and receive personalized agricultural advice in their local language.
 
 Our mission is to bridge the gap between technology and traditional farming, increasing yield and profitability for the indian farmer.
 
