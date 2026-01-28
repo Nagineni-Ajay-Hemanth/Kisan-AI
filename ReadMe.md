@@ -110,14 +110,6 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ---
 
-## 📸 Screenshots
-
-| Dashboard | Disease Scan | Expert Advice |
-|:---:|:---:|:---:|
-| ![Dashboard]([https://placehold.co/200x400/2ecc71/ffffff?text=Dashboard](https://github.com/Nagineni-Ajay-Hemanth/Kisan-AI/blob/main/assets/WhatsApp%20Image%202026-01-29%20at%201.17.26%20AM.jpeg)) | ![Disease](https://placehold.co/200x400/e74c3c/ffffff?text=Scan) | ![Advice](https://placehold.co/200x400/3498db/ffffff?text=Advice) |
-
-
----
 
 ## 👥 Team
 
