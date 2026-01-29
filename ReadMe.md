@@ -113,7 +113,7 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ## 👥 Team
 
-Built with ❤️ by the Kisan AI Team:
+Built by the Kisan AI Team:
 
 *   **B.Sreehitha**
 *   **N.Ajay Hemanth**
