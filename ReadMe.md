@@ -20,7 +20,7 @@
 
 ## 📖 About The Project
 
-**Kisan AI** (also known as FarmX) is a comprehensive digital assistant designed to revolutionize modern farming. By leveraging **Deep Learning** and **IoT-ready** architecture, it helps farmers detect crop diseases early, analyze soil health, and receive personalized agricultural advice in their local language.
+**Kisan AI** (also known as FarmX) is a comprehensive digital assistant designed to revolutionize modern farming. By leveraging **Deep Learning** architecture, it helps farmers detect crop diseases early, analyze soil health, and receive personalized agricultural advice in their local language.
 
 Our mission is to bridge the gap between technology and traditional farming, increasing yield and profitability for the indian farmer.
 
@@ -110,19 +110,10 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ---
 
-## 📸 Screenshots
-
-| Dashboard | Disease Scan | Expert Advice |
-|:---:|:---:|:---:|
-| ![Dashboard](https://placehold.co/200x400/2ecc71/ffffff?text=Dashboard) | ![Disease](https://placehold.co/200x400/e74c3c/ffffff?text=Scan) | ![Advice](https://placehold.co/200x400/3498db/ffffff?text=Advice) |
-
-*(Replace with actual screenshots of your app)*
-
----
 
 ## 👥 Team
 
-Built with ❤️ by the Kisan AI Team:
+Built by the Kisan AI Team:
 
 *   **B.Sreehitha**
 *   **N.Ajay Hemanth**
