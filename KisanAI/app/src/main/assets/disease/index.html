@@ -1,3 +1,4 @@
+<!-- Desease Detection page interface -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kisan AI - Disease Detection</title>
     <link rel="stylesheet" href="../shared/style.css">
-    <script src="../shared/config.js"></script>
     <script src="../shared/api-client.js"></script>
     <script src="../shared/translations.js"></script>
     <script src="../shared/language-manager.js"></script>
@@ -22,16 +22,21 @@
             </a>
         </div>
         <nav class="header-nav">
-            <button class="nav-icon-btn" onclick="window.history.back()"><span
-                    style="font-size: 1.2rem;">⬅️</span></button>
+            <button class="nav-icon-btn" onclick="toggleLanguageModal()" title="Change Language">
+                <span style="font-size: 1.2rem;">🌐</span>
+            </button>
+            <button class="nav-icon-btn" onclick="window.history.back()">
+                <span style="font-size: 1.2rem;">⬅️</span>
+            </button>
         </nav>
     </header>
 
     <div class="container">
 
         <div style="text-align: center; margin-bottom: 24px;">
-            <h1 style="color: var(--primary); margin-bottom: 8px;">Disease Detection</h1>
-            <p style="color: var(--text-secondary);">Upload a photo of your crop to instantly identify diseases and get
+            <h1 style="color: var(--primary); margin-bottom: 8px;" data-i18n="disease_title">Disease Detection</h1>
+            <p style="color: var(--text-secondary);" data-i18n="disease_subtitle">Upload a photo of your crop to
+                instantly identify diseases and get
                 treatment advice.</p>
         </div>
 
@@ -43,7 +48,8 @@
 
                 <div id="scanPlaceholder">
                     <span style="font-size: 3rem; display: block; margin-bottom: 8px;">📷</span>
-                    <span style="font-weight: 600; color: var(--primary);">Tap to Upload Image</span>
+                    <span style="font-weight: 600; color: var(--primary);" data-i18n="tap_upload">Tap to Upload
+                        Image</span>
                 </div>
 
                 <img id="imagePreview" style="display: none; width: 100%; height: 100%; object-fit: cover;">
@@ -51,24 +57,26 @@
 
             <!-- Action Buttons -->
             <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: center;">
-                <button onclick="triggerCamera()" class="btn-primary" style="flex: 1;">
+                <button onclick="triggerCamera()" class="btn-primary" style="flex: 1;" data-i18n="btn_camera">
                     📸 Camera
                 </button>
-                <button onclick="triggerUpload()" class="btn-secondary" style="flex: 1;">
+                <button onclick="triggerUpload()" class="btn-secondary" style="flex: 1;" data-i18n="btn_gallery">
                     🖼️ Gallery
                 </button>
             </div>
 
             <!-- Analyze Button (Hidden initially) -->
             <button id="btnAnalyze" class="btn-primary" onclick="analyzeImage()"
-                style="margin-top: 16px; background: var(--accent); color: var(--text-main); display: none;">
+                style="margin-top: 16px; background: var(--accent); color: var(--text-main); display: none;"
+                data-i18n="btn_analyze_crop">
                 🔍 Analyze Crop
             </button>
 
             <!-- Loading State -->
             <div id="loadingState" style="display: none; margin-top: 20px;">
-                <p style="font-weight: 600; color: var(--primary);">Analyzing crop...</p>
-                <p style="font-size: 0.9rem; color: var(--text-secondary);">Please wait a moment</p>
+                <p style="font-weight: 600; color: var(--primary);" data-i18n="status_processing">Analyzing crop...</p>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);" data-i18n="status_wait">Please wait a moment
+                </p>
             </div>
 
             <!-- Result Display -->
@@ -78,7 +86,8 @@
                 <p id="resultConfidence" style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 12px;">
                     Confidence: 98%</p>
 
-                <a href="../advice/index.html" class="btn-primary" style="padding: 10px; font-size: 0.9rem;">
+                <a href="../advice/index.html" class="btn-primary" style="padding: 10px; font-size: 0.9rem;"
+                    data-i18n="btn_view_advice">
                     View Treatment Advice
                 </a>
             </div>

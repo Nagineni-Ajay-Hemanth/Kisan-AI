@@ -5,7 +5,7 @@
 
 window.FARMX_CONFIG = {
     // Backend server URL (Local Network)
-    API_URL: "https://abraham-submissions-narrow-granny.trycloudflare.com",
+    API_URL: "https://blowing-bonds-deaf-shoes.trycloudflare.com",
     // Optional: Enable debug logging
     DEBUG: true
 };

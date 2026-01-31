@@ -1,18 +1,19 @@
+/*All shared components */
 /* ================= RESET & VARIABLES ================= */
 :root {
-    /* Color Palette */
-    --primary: #1b5e20;
-    --primary-light: #2e7d32;
-    --primary-dark: #003300;
-    --accent: #fbc02d;
-    --accent-light: #fff59d;
+    /* Color Palette - Light Green Meadow Theme */
+    --primary: #558B2F;
+    --primary-light: #9CCC65;
+    --primary-dark: #33691E;
+    --accent: #9CCC65;
+    --accent-light: #DCEDC8;
 
-    --bg-body: #f0f4f1;
-    --bg-card: #ffffff;
+    --bg-body: #F1F8E9;
+    --bg-card: #FFFFFF;
     --bg-glass: rgba(255, 255, 255, 0.95);
 
-    --text-main: #1f2933;
-    --text-secondary: #5f6c6d;
+    --text-main: #33691E;
+    --text-secondary: #558B2F;
     --text-white: #ffffff;
 
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -365,7 +366,7 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+    background: linear-gradient(135deg, #F1F8E9 0%, #DCEDC8 100%);
     padding: 20px;
 }
 
@@ -541,19 +542,20 @@ header {
 }
 
 .scan-container {
-    border: 2px dashed #a5d6a7;
+    border: 2px dashed var(--primary-light);
     border-radius: var(--radius-md);
     height: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f1f8e9;
+    background: var(--bg-body);
     position: relative;
     transition: all 0.2s;
 }
 
+
 .scan-container:active {
-    background: #e8f5e9;
+    background: var(--primary-light);
     transform: scale(0.98);
 }
 

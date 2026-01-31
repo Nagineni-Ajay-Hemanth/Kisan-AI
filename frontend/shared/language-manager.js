@@ -25,8 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>`;
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-    // Apply saved language
-    const savedLang = localStorage.getItem('appLanguage') || 'en';
+    // Apply saved language - USE 'language' KEY TO MATCH OTHER CODE
+    const savedLang = localStorage.getItem('language') || 'en';
     applyLanguage(savedLang);
 });
 
@@ -41,28 +41,44 @@ window.toggleLanguageModal = function () {
 }
 
 window.setLanguage = function (lang) {
-    localStorage.setItem('appLanguage', lang);
+    // USE 'language' KEY TO MATCH OTHER CODE
+    localStorage.setItem('language', lang);
     applyLanguage(lang);
     toggleLanguageModal();
-
-    // Explicitly reload if on home page to force refresh dynamic content if needed
-    // location.reload(); 
-    // ^ No, reload is bad UX. applyLanguage should be enough.
 }
 
 function applyLanguage(lang) {
-    if (!window.translations || !window.translations[lang]) return;
+    if (!window.translations || !window.translations[lang]) {
+        console.warn(`Language ${lang} not found in translations`);
+        return;
+    }
 
     const elements = document.querySelectorAll('[data-i18n]');
     elements.forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (window.translations[lang][key]) {
-            if (el.tagName === 'INPUT' && el.getAttribute('placeholder')) {
-                el.placeholder = window.translations[lang][key];
-            } else {
-                el.textContent = window.translations[lang][key];
+        const translation = window.translations[lang][key];
+
+        if (translation) {
+            // Handle input placeholders
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                if (el.hasAttribute('placeholder')) {
+                    el.placeholder = translation;
+                }
             }
+            // Handle option elements
+            else if (el.tagName === 'OPTION') {
+                el.textContent = translation;
+            }
+            // Handle all other elements
+            else {
+                el.textContent = translation;
+            }
+        } else {
+            console.warn(`Translation key "${key}" not found for language "${lang}"`);
         }
     });
+
+    console.log(`Applied language: ${lang}`);
 }
+
 window.applyLanguage = applyLanguage;

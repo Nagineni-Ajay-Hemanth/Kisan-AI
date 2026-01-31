@@ -17,3 +17,6 @@ app/build/
 .vscode/
 node_modules/
 backend-server/database/farmx.db
+nohup.out
+__pycache__/
+*.pyc

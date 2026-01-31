@@ -4,7 +4,7 @@ import json
 import os
 
 # Configure Generative AI Client
-API_KEY = "AIzaSyCZDN_eHK8fb5dgJIv8RwC-SKReApbqAdk"
+API_KEY = "AIzaSyCq0ejAwUG2awm6bTfkreP_lthdxkbEwJI"
 client = genai.Client(api_key=API_KEY)
 
 class AgriAdvisor:

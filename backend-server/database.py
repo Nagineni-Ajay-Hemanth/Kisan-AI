@@ -14,7 +14,11 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             mobile TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
-            username TEXT
+            username TEXT,
+            city TEXT,
+            state TEXT,
+            crop TEXT DEFAULT 'Wheat',
+            language TEXT DEFAULT 'en'
         )
     ''')
     

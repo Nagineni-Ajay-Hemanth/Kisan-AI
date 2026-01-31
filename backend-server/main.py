@@ -1,15 +1,18 @@
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import torch
-from torchvision import models, transforms, datasets
-import torch.nn as nn
-from PIL import Image
-import torch.nn.functional as F
-import io
+
 import sqlite3
 import os
 from datetime import datetime
+
+import cv2
+import numpy as np
+import sys
+
+
+# Import new logic engine
+from logic.plant_detection_engine import AutoPlantDiseaseDetector
 
 app = FastAPI()
 
@@ -35,73 +38,45 @@ class UserRegister(BaseModel):
     mobile: str
     password: str
     username: str = None
+    city: str = None
+    state: str = None
+    crop: str = "Wheat"
+    language: str = "en"
 
 class UserLogin(BaseModel):
     mobile: str
     password: str
 
 # --- Paths ---
-DATASET_PATH = os.path.join(BASE_DIR, "datasets", "PlantVillage")
-MODEL_PATH = os.path.join(BASE_DIR, "models", "plant_disease_model.pth")
-SOIL_DATASET_PATH = os.path.join(BASE_DIR, "datasets", "Soil Types")
-SOIL_MODEL_PATH = os.path.join(BASE_DIR, "models", "soil_type_model.pth")
+# --- Paths ---
+# DATASET_PATH = os.path.join(BASE_DIR, "datasets", "PlantVillage") # Removed
+# MODEL_PATH = os.path.join(BASE_DIR, "models", "plant_disease_model.pth") # Removed
+
+
+# --- Initialize Plant Detector Engine ---
+plant_detector = AutoPlantDiseaseDetector()
 
 # --- Disease Model Setup ---
-# Load dataset to get class names (Cached globally)
+# --- Disease Model Setup ---
+# Legacy PyTorch model code removed. Using AutoPlantDiseaseDetector instead.
+# Class names are now handled by the engine's database.
+
+
+
+# Load Model (Legacy Removed)
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# model = models.efficientnet_b0(weights=None) ...
+
+# --- Soil Engine Setup ---
+from logic.soil_engine import SoilEngine
+
 try:
-    dataset = datasets.ImageFolder(DATASET_PATH)
-    class_names = dataset.classes
+    soil_engine = SoilEngine()
+    print("Soil Engine initialized successfully.")
 except Exception as e:
-    print(f"Warning: Could not load dataset from {DATASET_PATH}. Error: {e}")
-    class_names = [] # Handle gracefully or crash if critical
+    print(f"Error initializing Soil Engine: {e}")
+    soil_engine = None
 
-# Transform
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406],
-                         [0.229, 0.224, 0.225])
-])
-
-# Load Model
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = models.efficientnet_b0(weights=None)
-if class_names:
-    num_classes = len(class_names)
-    model.classifier[1] = nn.Linear(model.classifier[1].in_features, num_classes)
-    
-    try:
-        model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
-        model.to(device)
-        model.eval()
-        print("Model loaded successfully.")
-    except Exception as e:
-        print(f"Error loading model: {e}")
-else:
-    print("Model not fully initialized due to missing class names.")
-
-# --- Soil Model Setup ---
-try:
-    soil_dataset = datasets.ImageFolder(SOIL_DATASET_PATH)
-    soil_class_names = soil_dataset.classes
-except Exception as e:
-    print(f"Warning: Could not load soil dataset from {SOIL_DATASET_PATH}. Error: {e}")
-    soil_class_names = []
-
-soil_model = models.efficientnet_b0(weights=None)
-if soil_class_names:
-    num_soil_classes = len(soil_class_names)
-    soil_model.classifier[1] = nn.Linear(soil_model.classifier[1].in_features, num_soil_classes)
-    
-    try:
-        soil_model.load_state_dict(torch.load(SOIL_MODEL_PATH, map_location=device))
-        soil_model.to(device)
-        soil_model.eval()
-        print("Soil Model loaded successfully.")
-    except Exception as e:
-        print(f"Error loading soil model: {e}")
-else:
-    print("Soil Model not fully initialized due to missing class names.")
 
 
 # --- Auth Endpoints ---
@@ -171,8 +146,8 @@ def register(user: UserRegister):
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO users (mobile, password, username) VALUES (?, ?, ?)", 
-                       (user.mobile, user.password, user.username or user.mobile))
+        cursor.execute("INSERT INTO users (mobile, password, username, city, state, crop, language) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+                       (user.mobile, user.password, user.username or user.mobile, user.city, user.state, user.crop, user.language))
         conn.commit()
         return {"message": "User registered successfully"}
     except sqlite3.IntegrityError:
@@ -201,54 +176,100 @@ def login(user: UserLogin):
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...), user_id: int = Form(...)):
-    if not class_names:
-        return {"error": "Class names not loaded. Check server logs."}
-        
     try:
+        # Read image
         image_data = await file.read()
-        img = Image.open(io.BytesIO(image_data)).convert("RGB")
-        img = transform(img).unsqueeze(0).to(device)
+        
+        # Convert to CV2 format
+        nparr = np.frombuffer(image_data, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        if img is None:
+             return {"error": "Could not decode image"}
 
-        with torch.no_grad():
-            out = model(img)
-            probs = F.softmax(out, dim=1)
-            conf, pred = torch.max(probs, 1)
-
-        disease = class_names[pred.item()]
-        confidence = conf.item()
-
-        # Save to DB
+        # Analyze using the new engine
+        # We pass the filename for logging purposes in the engine
+        analysis_result = plant_detector.analyze_image(img, image_name=file.filename)
+        
+        # Extract keys for API response/DB
+        # The engine returns a rich structure. We default to:
+        # result='Healthy' or Disease Name
+        # confidence=float
+        
+        diseases = analysis_result.get("disease_diagnosis", [])
+        plant_type = analysis_result.get("plant_identification", {}).get("identified_as", "Unknown")
+        
+        primary_disease = "Unknown"
+        confidence = 0.0
+        
+        if diseases:
+             primary_disease = diseases[0]['name']
+             # Confidence might be a string "High"/"Medium" or float depending on engine logic
+             # Engine logic: confidence: "High" or "Medium". 
+             # Let's map it to float for DB compatibility if needed, or keep string?
+             # Old DB expected confidence as REAL (float).
+             # Let's try to parse or just assign 0.9 for High, 0.5 for Medium
+             
+             conf_str = diseases[0].get('confidence', 'Low')
+             if conf_str == 'High': confidence = 0.95
+             elif conf_str == 'Medium': confidence = 0.75
+             elif conf_str == 'Low': confidence = 0.40
+             elif isinstance(conf_str, (int, float)): confidence = float(conf_str)
+             else: confidence = 0.5
+        else:
+             primary_disease = "Healthy"
+             confidence = 0.99
+             
+        # Save to DB (Legacy table for compatibility with history)
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO test_results (user_id, test_type, result, confidence) VALUES (?, ?, ?, ?)",
-            (user_id, 'disease', disease, confidence)
+            (user_id, 'disease', primary_disease, confidence)
         )
         conn.commit()
         conn.close()
 
-        return {"disease": disease, "confidence": confidence}
+        # We return the simple response as before, OR the full rich response?
+        # The frontend likely expects {disease, confidence}.
+        # But we can also return everything if the frontend can handle it.
+        # Let's return the old keys + a 'details' key with full report.
+        
+        return {
+            "disease": primary_disease, 
+            "confidence": confidence,
+            "plant": plant_type,
+            "details": analysis_result
+        }
+            
     except Exception as e:
         print(f"Error in prediction: {e}")
         return {"error": str(e)}
 
 @app.post("/predict_soil")
-async def predict_soil(file: UploadFile = File(...), user_id: int = Form(...)):
-    if not soil_class_names:
-        return {"error": "Soil class names not loaded. Check server logs."}
+async def predict_soil(
+    file: UploadFile = File(...), 
+    user_id: int = Form(...),
+    lat: float = Form(None),
+    lon: float = Form(None)
+):
+    if not soil_engine:
+        return {"error": "Soil Engine not initialized."}
         
     try:
+        # Read image
         image_data = await file.read()
-        img = Image.open(io.BytesIO(image_data)).convert("RGB")
-        img = transform(img).unsqueeze(0).to(device)
+        nparr = np.frombuffer(image_data, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        if img is None:
+             return {"error": "Could not decode image"}
 
-        with torch.no_grad():
-            out = soil_model(img)
-            probs = F.softmax(out, dim=1)
-            conf, pred = torch.max(probs, 1)
-
-        soil_type = soil_class_names[pred.item()]
-        confidence = conf.item()
+        # Process using Soil Engine
+        result = soil_engine.process(img, lat, lon)
+        
+        soil_type = result['soil_type']
+        confidence = result['confidence']
 
         # Save to DB
         conn = get_db_connection()
@@ -260,7 +281,7 @@ async def predict_soil(file: UploadFile = File(...), user_id: int = Form(...)):
         conn.commit()
         conn.close()
         
-        return {"soil_type": soil_type, "confidence": confidence}
+        return result
     except Exception as e:
         print(f"Error in soil prediction: {e}")
         return {"error": str(e)}
@@ -298,6 +319,12 @@ def get_user_advice(user_id: int, lat: float = None, lon: float = None, language
         ORDER BY timestamp DESC LIMIT 2
     """, (user_id,))
     soil_rows = cursor.fetchall()
+    
+    cursor.execute("""
+        SELECT crop FROM users WHERE id = ?
+    """, (user_id,))
+    user_data_row = cursor.fetchone()
+    user_crop = user_data_row["crop"] if user_data_row and user_data_row["crop"] else "Wheat"
     
     conn.close()
     
@@ -337,8 +364,8 @@ def get_user_advice(user_id: int, lat: float = None, lon: float = None, language
         except Exception as e:
             print(f"Error fetching weather for advice: {e}")
 
-    # crop would ideally come from user profile or selected in frontend. Defaulting to general.
-    crop = "Wheat" 
+    # Crop from User Profile
+    crop = user_crop 
 
     input_data = {
         "past_soil_type": past_soil_type,

@@ -1,3 +1,5 @@
+<!-- Govt. scheme interface -->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -58,63 +60,77 @@
             </a>
         </div>
         <nav class="header-nav">
-            <button class="nav-icon-btn" onclick="window.history.back()"><span
-                    style="font-size: 1.2rem;">⬅️</span></button>
+            <button class="nav-icon-btn" onclick="toggleLanguageModal()" title="Change Language">
+                <span style="font-size: 1.2rem;">🌐</span>
+            </button>
+            <button class="nav-icon-btn" onclick="window.history.back()">
+                <span style="font-size: 1.2rem;">⬅️</span>
+            </button>
         </nav>
     </header>
 
     <div class="container">
         <div style="text-align: center; margin-bottom: 24px;">
-            <h1 style="color: var(--primary); margin-bottom: 8px;">Govt. Schemes</h1>
-            <p style="color: var(--text-secondary);">Benefits and insurance for every farmer.</p>
+            <h1 style="color: var(--primary); margin-bottom: 8px;" data-i18n="schemes_title">Govt. Schemes</h1>
+            <p style="color: var(--text-secondary);" data-i18n="schemes_subtitle">Benefits and insurance for every
+                farmer.</p>
         </div>
 
         <!-- Filter Tabs -->
         <div class="tabs" style="display: flex; gap: 10px; margin-bottom: 24px; justify-content: center;">
             <button class="tab-btn active" onclick="filterSchemes('govt')" id="tabGovt"
-                style="padding: 10px 20px; border-radius: 20px; border: none; background: #2ecc71; color: white;">Government</button>
+                style="padding: 10px 20px; border-radius: 20px; border: none; background: #2ecc71; color: white;"
+                data-i18n="tab_govt">Government</button>
             <button class="tab-btn" onclick="filterSchemes('insurance')" id="tabInsurance"
-                style="padding: 10px 20px; border-radius: 20px; border: none; background: #eee; color: #333;">Insurance</button>
+                style="padding: 10px 20px; border-radius: 20px; border: none; background: #eee; color: #333;"
+                data-i18n="tab_insurance">Insurance</button>
         </div>
 
         <!-- Government Schemes -->
         <div id="govtSchemes">
             <div class="scheme-card">
-                <span class="scheme-badge">Financial Aid</span>
-                <h3 style="margin: 0 0 8px 0;">PM-Kisan Samman Nidhi</h3>
-                <p style="color: #666; font-size: 0.95rem;">Annual income support of ₹6,000 for all land-holding farmer
+                <span class="scheme-badge" data-i18n="badge_finance">Financial Aid</span>
+                <h3 style="margin: 0 0 8px 0;" data-i18n="scheme_pm_kisan">PM-Kisan Samman Nidhi</h3>
+                <p style="color: #666; font-size: 0.95rem;" data-i18n="desc_pm_kisan">Annual income support of ₹6,000
+                    for all land-holding farmer
                     families.</p>
                 <div style="margin-top:8px; display: flex; gap: 10px; color: #555; font-size: 0.9rem;">
                     <span>✅ ₹2,000/installment</span>
                     <span>✅ Direct Bank Transfer</span>
                 </div>
-                <button class="scheme-btn" onclick="window.location.href='https://pmkisan.gov.in/'">Apply Now</button>
+                <button class="scheme-btn" onclick="window.location.href='https://pmkisan.gov.in/'"
+                    data-i18n="btn_apply">Apply Now</button>
             </div>
 
             <div class="scheme-card">
-                <span class="scheme-badge">Development</span>
-                <h3 style="margin: 0 0 8px 0;">Paramparagat Krishi Vikas Yojana</h3>
-                <p style="color: #666; font-size: 0.95rem;">Financial assistance for organic farming promotion and
+                <span class="scheme-badge" data-i18n="badge_dev">Development</span>
+                <h3 style="margin: 0 0 8px 0;" data-i18n="scheme_pkvk">Paramparagat Krishi Vikas Yojana</h3>
+                <p style="color: #666; font-size: 0.95rem;" data-i18n="desc_pkvk">Financial assistance for organic
+                    farming promotion and
                     certification.</p>
-                <button class="scheme-btn" onclick="window.location.href='https://pgsindia-ncof.gov.in/'">View
+                <button class="scheme-btn" onclick="window.location.href='https://pgsindia-ncof.gov.in/'"
+                    data-i18n="btn_details">View
                     Details</button>
             </div>
 
             <div class="scheme-card">
-                <span class="scheme-badge">Credit</span>
-                <h3 style="margin: 0 0 8px 0;">Kisan Credit Card (KCC)</h3>
-                <p style="color: #666; font-size: 0.95rem;">Low-interest loans for farmers to meet agriculture and
+                <span class="scheme-badge" data-i18n="badge_credit">Credit</span>
+                <h3 style="margin: 0 0 8px 0;" data-i18n="scheme_kcc">Kisan Credit Card (KCC)</h3>
+                <p style="color: #666; font-size: 0.95rem;" data-i18n="desc_kcc">Low-interest loans for farmers to meet
+                    agriculture and
                     household needs.</p>
-                <button class="scheme-btn"
-                    onclick="window.location.href='https://www.myscheme.gov.in/schemes/kcc'">Apply via Bank</button>
+                <button class="scheme-btn" onclick="window.location.href='https://www.myscheme.gov.in/schemes/kcc'"
+                    data-i18n="btn_bank">Apply via Bank</button>
             </div>
 
             <div class="scheme-card">
-                <span class="scheme-badge">Soil Health</span>
-                <h3 style="margin: 0 0 8px 0;">Soil Health Card Scheme</h3>
-                <p style="color: #666; font-size: 0.95rem;">Get soil nutrient status and fertilizer recommendations for
+                <span class="scheme-badge" data-i18n="badge_soil_health">Soil Health</span>
+                <h3 style="margin: 0 0 8px 0;" data-i18n="scheme_soil_card">Soil Health Card Scheme</h3>
+                <p style="color: #666; font-size: 0.95rem;" data-i18n="desc_soil_card">Get soil nutrient status and
+                    fertilizer recommendations for
                     your farm.</p>
-                <button class="scheme-btn" onclick="window.location.href='https://soilhealth.dac.gov.in/'">Check
+                <button class="scheme-btn" onclick="window.location.href='https://soilhealth.dac.gov.in/'"
+                    data-i18n="btn_status">Check
                     Status</button>
             </div>
         </div>
@@ -122,25 +138,28 @@
         <!-- Insurance Schemes -->
         <div id="insuranceSchemes" style="display: none;">
             <div class="scheme-card">
-                <span class="scheme-badge insurance-badge">Crop Insurance</span>
-                <h3 style="margin: 0 0 8px 0;">PM Fasal Bima Yojana (PMFBY)</h3>
-                <p style="color: #666; font-size: 0.95rem;">Comprehensive crop insurance coverage against
+                <span class="scheme-badge insurance-badge" data-i18n="badge_insurance">Crop Insurance</span>
+                <h3 style="margin: 0 0 8px 0;" data-i18n="scheme_fby">PM Fasal Bima Yojana (PMFBY)</h3>
+                <p style="color: #666; font-size: 0.95rem;" data-i18n="desc_fby">Comprehensive crop insurance coverage
+                    against
                     non-preventable natural risks.</p>
                 <div style="margin-top:8px; display: flex; gap: 10px; color: #555; font-size: 0.9rem;">
                     <span>✅ Kharif: 2% Premium</span>
                     <span>✅ Rabi: 1.5% Premium</span>
                 </div>
                 <button class="scheme-btn" style="background: #1976d2;"
-                    onclick="window.location.href='https://pmfby.gov.in/'">Calculate Premium</button>
+                    onclick="window.location.href='https://pmfby.gov.in/'" data-i18n="btn_premium">Calculate
+                    Premium</button>
             </div>
 
             <div class="scheme-card">
-                <span class="scheme-badge insurance-badge">Social Security</span>
-                <h3 style="margin: 0 0 8px 0;">PM Kisan Maandhan Yojana</h3>
-                <p style="color: #666; font-size: 0.95rem;">Pension scheme ensuring ₹3,000 monthly pension for small and
+                <span class="scheme-badge insurance-badge" data-i18n="badge_social">Social Security</span>
+                <h3 style="margin: 0 0 8px 0;" data-i18n="scheme_pension">PM Kisan Maandhan Yojana</h3>
+                <p style="color: #666; font-size: 0.95rem;" data-i18n="desc_pension">Pension scheme ensuring ₹3,000
+                    monthly pension for small and
                     marginal farmers.</p>
                 <button class="scheme-btn" style="background: #1976d2;"
-                    onclick="window.location.href='https://maandhan.in/'">Enroll Now</button>
+                    onclick="window.location.href='https://maandhan.in/'" data-i18n="btn_enroll">Enroll Now</button>
             </div>
         </div>
 

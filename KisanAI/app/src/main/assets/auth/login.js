@@ -1,3 +1,4 @@
+//login page components 
 /* UI TOGGLES */
 function showRegister() {
     document.getElementById("loginBox").style.display = "none";

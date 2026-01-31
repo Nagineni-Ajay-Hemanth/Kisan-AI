@@ -1,3 +1,4 @@
+<!-- Crop advice interface -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -67,23 +68,27 @@
             </a>
         </div>
         <nav class="header-nav">
-            <button class="nav-icon-btn" onclick="window.history.back()"><span
-                    style="font-size: 1.2rem;">⬅️</span></button>
+            <button class="nav-icon-btn" onclick="toggleLanguageModal()" title="Change Language">
+                <span style="font-size: 1.2rem;">🌐</span>
+            </button>
+            <button class="nav-icon-btn" onclick="window.history.back()">
+                <span style="font-size: 1.2rem;">⬅️</span>
+            </button>
         </nav>
     </header>
 
     <div class="container">
 
         <div style="text-align: center; margin-bottom: 24px;">
-            <h1 style="color: var(--primary); margin-bottom: 8px;">Knowledge Hub</h1>
-            <p style="color: var(--text-secondary);">Expert guides for better farming.</p>
+            <h1 style="color: var(--primary); margin-bottom: 8px;" data-i18n="info_title">Knowledge Hub</h1>
+            <p style="color: var(--text-secondary);" data-i18n="info_subtitle">Expert guides for better farming.</p>
         </div>
 
         <!-- TABS -->
         <div class="tab-container" style="justify-content: center;">
-            <button class="tab-btn active" onclick="switchTab('crops')">Crops</button>
-            <button class="tab-btn" onclick="switchTab('fertilizers')">Fertilizers</button>
-            <button class="tab-btn" onclick="switchTab('pests')">Pests</button>
+            <button class="tab-btn active" onclick="switchTab('crops')" data-i18n="tab_crops">Crops</button>
+            <button class="tab-btn" onclick="switchTab('fertilizers')" data-i18n="tab_fertilizers">Fertilizers</button>
+            <button class="tab-btn" onclick="switchTab('pests')" data-i18n="tab_pests">Pests</button>
         </div>
 
         <!-- CROPS SECTION -->
@@ -91,8 +96,9 @@
             <div class="info-card">
                 <div class="info-icon">🌾</div>
                 <div class="info-content">
-                    <h4>Wheat (Rabi)</h4>
-                    <p>Sow in Nov-Dec. Requires cool climate. Best soil: Loamy. Irrigate at crown root initiation (20-25
+                    <h4 data-i18n="info_wheat">Wheat (Rabi)</h4>
+                    <p data-i18n="desc_wheat">Sow in Nov-Dec. Requires cool climate. Best soil: Loamy. Irrigate at crown
+                        root initiation (20-25
                         days).</p>
                     <span class="tag">Season: Winter</span> <span class="tag">Water: Moderate</span>
                 </div>
@@ -101,8 +107,9 @@
             <div class="info-card">
                 <div class="info-icon">🍚</div>
                 <div class="info-content">
-                    <h4>Rice / Paddy (Kharif)</h4>
-                    <p>Sow in June-July via transplantation. Needs standing water. Harvest in Oct-Nov when grains turn
+                    <h4 data-i18n="info_rice">Rice / Paddy (Kharif)</h4>
+                    <p data-i18n="desc_rice">Sow in June-July via transplantation. Needs standing water. Harvest in
+                        Oct-Nov when grains turn
                         golden.</p>
                     <span class="tag">Season: Monsoon</span> <span class="tag">Water: High</span>
                 </div>
@@ -111,8 +118,9 @@
             <div class="info-card">
                 <div class="info-icon">☁️</div>
                 <div class="info-content">
-                    <h4>Cotton</h4>
-                    <p>Cash crop. Needs Black soil. Avoid water logging during flowering. Susceptible to Bollworm.</p>
+                    <h4 data-i18n="info_cotton">Cotton</h4>
+                    <p data-i18n="desc_cotton">Cash crop. Needs Black soil. Avoid water logging during flowering.
+                        Susceptible to Bollworm.</p>
                     <span class="tag">Duration: 6-8 Months</span>
                 </div>
             </div>
@@ -123,8 +131,9 @@
             <div class="info-card">
                 <div class="info-icon">🧪</div>
                 <div class="info-content">
-                    <h4>Urea (Nitrogen)</h4>
-                    <p>Promotes leafy green growth. Apply in split doses (Basal + 2 Top dressings). Don't apply on wet
+                    <h4 data-i18n="info_urea">Urea (Nitrogen)</h4>
+                    <p data-i18n="desc_urea">Promotes leafy green growth. Apply in split doses (Basal + 2 Top
+                        dressings). Don't apply on wet
                         leaves.</p>
                     <span class="tag">Usage: 50-100 kg/acre</span>
                 </div>
@@ -133,8 +142,9 @@
             <div class="info-card">
                 <div class="info-icon">🪨</div>
                 <div class="info-content">
-                    <h4>DAP (Phosphorus)</h4>
-                    <p>Root development. Apply as basal dose (during sowing). Place below seed for best results.</p>
+                    <h4 data-i18n="info_dap">DAP (Phosphorus)</h4>
+                    <p data-i18n="desc_dap">Root development. Apply as basal dose (during sowing). Place below seed for
+                        best results.</p>
                     <span class="tag">Usage: 50 kg/acre</span>
                 </div>
             </div>
@@ -142,8 +152,9 @@
             <div class="info-card">
                 <div class="info-icon">🍂</div>
                 <div class="info-content">
-                    <h4>Organic Compost</h4>
-                    <p>Improves soil structure and water holding capacity. Apply 2-3 weeks before sowing.</p>
+                    <h4 data-i18n="info_compost">Organic Compost</h4>
+                    <p data-i18n="desc_compost">Improves soil structure and water holding capacity. Apply 2-3 weeks
+                        before sowing.</p>
                     <span class="tag">Eco-friendly</span>
                 </div>
             </div>
@@ -154,8 +165,9 @@
             <div class="info-card">
                 <div class="info-icon">🐛</div>
                 <div class="info-content">
-                    <h4>Stem Borer</h4>
-                    <p>Affects Rice/Maize. <b>Symptoms:</b> Dead hearts in seedlings, white heads. <b>Remedy:</b> Cartap
+                    <h4 data-i18n="info_stem_borer">Stem Borer</h4>
+                    <p data-i18n="desc_stem_borer">Affects Rice/Maize. <b>Symptoms:</b> Dead hearts in seedlings, white
+                        heads. <b>Remedy:</b> Cartap
                         Hydrochloride.</p>
                 </div>
             </div>
@@ -163,8 +175,9 @@
             <div class="info-card">
                 <div class="info-icon">🦟</div>
                 <div class="info-content">
-                    <h4>Aphids</h4>
-                    <p>Sucks sap from leaves. <b>Symptoms:</b> Yellowing, curling leaves. <b>Remedy:</b> Neem Oil spray.
+                    <h4 data-i18n="info_aphids">Aphids</h4>
+                    <p data-i18n="desc_aphids">Sucks sap from leaves. <b>Symptoms:</b> Yellowing, curling leaves.
+                        <b>Remedy:</b> Neem Oil spray.
                     </p>
                 </div>
             </div>

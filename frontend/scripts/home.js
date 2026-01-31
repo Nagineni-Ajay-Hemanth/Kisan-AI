@@ -1,3 +1,4 @@
+/* crop analyzer,soil analyzer components*/
 // --- CHAT LOGIC ---
 function openChat() {
     document.getElementById('chatModal').style.display = 'flex';

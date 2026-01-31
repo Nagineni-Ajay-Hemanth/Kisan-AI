@@ -1,3 +1,5 @@
+<!-- market price interface -->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -157,8 +159,12 @@
             </a>
         </div>
         <nav class="header-nav">
-            <button class="nav-icon-btn" onclick="window.history.back()"><span
-                    style="font-size: 1.2rem;">⬅️</span></button>
+            <button class="nav-icon-btn" onclick="toggleLanguageModal()" title="Change Language">
+                <span style="font-size: 1.2rem;">🌐</span>
+            </button>
+            <button class="nav-icon-btn" onclick="window.history.back()">
+                <span style="font-size: 1.2rem;">⬅️</span>
+            </button>
         </nav>
     </header>
 
@@ -172,16 +178,16 @@
         <!-- Search -->
         <div class="search-bar">
             <input type="text" class="search-input" placeholder="Search vegetables, grains..."
-                onkeyup="filterProducts(this.value)">
+                data-i18n="market_search_ph" onkeyup="filterProducts(this.value)">
         </div>
 
         <!-- Categories -->
         <div class="category-scroll">
-            <div class="cat-chip active" onclick="filterCat('all', this)">All</div>
-            <div class="cat-chip" onclick="filterCat('veg', this)">Vegetables</div>
-            <div class="cat-chip" onclick="filterCat('fruit', this)">Fruits</div>
-            <div class="cat-chip" onclick="filterCat('grain', this)">Grains</div>
-            <div class="cat-chip" onclick="filterCat('commercial', this)">Commercial</div>
+            <div class="cat-chip active" onclick="filterCat('all', this)" data-i18n="cat_all">All</div>
+            <div class="cat-chip" onclick="filterCat('veg', this)" data-i18n="cat_veg">Vegetables</div>
+            <div class="cat-chip" onclick="filterCat('fruit', this)" data-i18n="cat_fruit">Fruits</div>
+            <div class="cat-chip" onclick="filterCat('grain', this)" data-i18n="cat_grain">Grains</div>
+            <div class="cat-chip" onclick="filterCat('commercial', this)" data-i18n="cat_comm">Commercial</div>
         </div>
 
         <!-- Products -->
@@ -198,39 +204,43 @@
 
     <script>
         const products = [
-            { name: "Tomato (Desi)", price: "₹25", unit: "/ kg", cat: "veg", icon: "🍅" },
-            { name: "Potato", price: "₹18", unit: "/ kg", cat: "veg", icon: "🥔" },
-            { name: "Onion (Red)", price: "₹30", unit: "/ kg", cat: "veg", icon: "🧅" },
-            { name: "Rice (Basmati)", price: "₹80", unit: "/ kg", cat: "grain", icon: "🍚" },
-            { name: "Wheat (Sharbati)", price: "₹35", unit: "/ kg", cat: "grain", icon: "🌾" },
-            { name: "Carrots", price: "₹40", unit: "/ kg", cat: "veg", icon: "🥕" },
-            { name: "Spinach", price: "₹15", unit: "/ bunch", cat: "veg", icon: "🥬" },
-            { name: "Mango (Alphonso)", price: "₹150", unit: "/ dozen", cat: "fruit", icon: "🥭" },
-            { name: "Banana", price: "₹40", unit: "/ dozen", cat: "fruit", icon: "🍌" },
-            { name: "Cotton", price: "₹6,000", unit: "/ quintal", cat: "commercial", icon: "☁️" },
-            { name: "Sugarcane", price: "₹350", unit: "/ quintal", cat: "commercial", icon: "🎋" },
-            { name: "Corn / Maize", price: "₹22", unit: "/ kg", cat: "grain", icon: "🌽" },
-            { name: "Green Apple", price: "₹120", unit: "/ kg", cat: "fruit", icon: "🍏" },
-            { name: "Grapes", price: "₹80", unit: "/ kg", cat: "fruit", icon: "🍇" },
-            { name: "Red Chillies", price: "₹180", unit: "/ kg", cat: "commercial", icon: "🌶️" },
-            { name: "Garlic", price: "₹150", unit: "/ kg", cat: "veg", icon: "🧄" },
+            { nameKey: "prod_tomato", defaultName: "Tomato (Desi)", price: "₹25", unit: "/ kg", cat: "veg", icon: "🍅" },
+            { nameKey: "prod_potato", defaultName: "Potato", price: "₹18", unit: "/ kg", cat: "veg", icon: "🥔" },
+            { nameKey: "prod_onion", defaultName: "Onion (Red)", price: "₹30", unit: "/ kg", cat: "veg", icon: "🧅" },
+            { nameKey: "prod_rice_bas", defaultName: "Rice (Basmati)", price: "₹80", unit: "/ kg", cat: "grain", icon: "🍚" },
+            { nameKey: "prod_wheat_shar", defaultName: "Wheat (Sharbati)", price: "₹35", unit: "/ kg", cat: "grain", icon: "🌾" },
+            { nameKey: "prod_carrot", defaultName: "Carrots", price: "₹40", unit: "/ kg", cat: "veg", icon: "🥕" },
+            { nameKey: "prod_spinach", defaultName: "Spinach", price: "₹15", unit: "/ bunch", cat: "veg", icon: "🥬" },
+            { nameKey: "prod_mango", defaultName: "Mango (Alphonso)", price: "₹150", unit: "/ dozen", cat: "fruit", icon: "🥭" },
+            { nameKey: "prod_banana", defaultName: "Banana", price: "₹40", unit: "/ dozen", cat: "fruit", icon: "🍌" },
+            { nameKey: "prod_cotton", defaultName: "Cotton", price: "₹6,000", unit: "/ quintal", cat: "commercial", icon: "☁️" },
+            { nameKey: "prod_sugar", defaultName: "Sugarcane", price: "₹350", unit: "/ quintal", cat: "commercial", icon: "🎋" },
+            { nameKey: "prod_corn", defaultName: "Corn / Maize", price: "₹22", unit: "/ kg", cat: "grain", icon: "🌽" },
+            { nameKey: "prod_apple", defaultName: "Green Apple", price: "₹120", unit: "/ kg", cat: "fruit", icon: "🍏" },
+            { nameKey: "prod_grapes", defaultName: "Grapes", price: "₹80", unit: "/ kg", cat: "fruit", icon: "🍇" },
+            { nameKey: "prod_chilli", defaultName: "Red Chillies", price: "₹180", unit: "/ kg", cat: "commercial", icon: "🌶️" },
+            { nameKey: "prod_garlic", defaultName: "Garlic", price: "₹150", unit: "/ kg", cat: "veg", icon: "🧄" },
         ];
 
         function renderProducts(filterText = "", filterCategory = "all") {
             const grid = document.getElementById('productGrid');
             grid.innerHTML = "";
+            const currentLang = localStorage.getItem('language') || 'en';
+            const t = window.translations[currentLang] || window.translations['en'];
 
             products.forEach(p => {
-                const matchesText = p.name.toLowerCase().includes(filterText.toLowerCase());
+                const displayName = t[p.nameKey] || p.defaultName;
+                const matchesText = displayName.toLowerCase().includes(filterText.toLowerCase());
                 const matchesCat = filterCategory === "all" || p.cat === filterCategory;
 
                 if (matchesText && matchesCat) {
                     const card = document.createElement('div');
                     card.className = "product-card";
-                    card.onclick = () => showToast(`Contacting seller for ${p.name}...`);
+                    const msg = (t.msg_contact_seller || "Contacting seller for {item}...").replace("{item}", displayName);
+                    card.onclick = () => showToast(msg);
                     card.innerHTML = `
                         <div class="product-img">${p.icon}</div>
-                        <div class="product-name">${p.name}</div>
+                        <div class="product-name">${displayName}</div>
                         <div class="product-price">${p.price} <span class="product-unit">${p.unit}</span></div>
                     `;
                     grid.appendChild(card);
@@ -255,7 +265,9 @@
         }
 
         function openSellModal() {
-            showToast("Seller Registration Portal opening...");
+            const currentLang = localStorage.getItem('language') || 'en';
+            const t = window.translations[currentLang] || window.translations['en'];
+            showToast(t.msg_seller_portal || "Seller Registration Portal opening...");
         }
 
         // Initial Render

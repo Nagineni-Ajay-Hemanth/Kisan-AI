@@ -1,3 +1,5 @@
+<!-- water suggestion interface -->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -65,8 +67,12 @@
             </a>
         </div>
         <nav class="header-nav">
-            <button class="nav-icon-btn" onclick="window.history.back()"><span
-                    style="font-size: 1.2rem;">⬅️</span></button>
+            <button class="nav-icon-btn" onclick="toggleLanguageModal()" title="Change Language">
+                <span style="font-size: 1.2rem;">🌐</span>
+            </button>
+            <button class="nav-icon-btn" onclick="window.history.back()">
+                <span style="font-size: 1.2rem;">⬅️</span>
+            </button>
         </nav>
     </header>
 
@@ -81,12 +87,12 @@
             <div class="form-group">
                 <label class="form-label" data-i18n="water_crop">Crop Type</label>
                 <select class="form-select" id="cropType">
-                    <option value="wheat">Wheat</option>
-                    <option value="rice">Rice (Paddy)</option>
-                    <option value="cotton">Cotton</option>
-                    <option value="sugarcane">Sugarcane</option>
-                    <option value="tomato">Tomato</option>
-                    <option value="maize">Maize</option>
+                    <option value="wheat" data-i18n="crop_wheat">Wheat</option>
+                    <option value="rice" data-i18n="crop_rice">Rice (Paddy)</option>
+                    <option value="cotton" data-i18n="prod_cotton">Cotton</option>
+                    <option value="sugarcane" data-i18n="crop_sugarcane">Sugarcane</option>
+                    <option value="tomato" data-i18n="crop_tomato">Tomato</option>
+                    <option value="maize" data-i18n="crop_maize">Maize</option>
                 </select>
             </div>
 
@@ -98,30 +104,30 @@
             <div class="form-group">
                 <label class="form-label" data-i18n="water_soil">Soil Type</label>
                 <select class="form-select" id="soilType">
-                    <option value="loamy">Loamy Soil (Ideal)</option>
-                    <option value="clay">Clay Soil (Holds Water)</option>
-                    <option value="sandy">Sandy Soil (Drains Fast)</option>
-                    <option value="black">Black Soil</option>
-                    <option value="red">Red Soil</option>
+                    <option value="loamy" data-i18n="water_soil_loam_ideal">Loamy Soil (Ideal)</option>
+                    <option value="clay" data-i18n="water_soil_clay_hold">Clay Soil (Holds Water)</option>
+                    <option value="sandy" data-i18n="water_soil_sandy_drain">Sandy Soil (Drains Fast)</option>
+                    <option value="black" data-i18n="soil_black">Black Soil</option>
+                    <option value="red" data-i18n="soil_red">Red Soil</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label class="form-label" data-i18n="water_rain">Recent Rainfall (Last 2 days)</label>
                 <select class="form-select" id="rainStatus">
-                    <option value="0">No Rain</option>
-                    <option value="5">Light Rain (< 5mm)</option>
-                    <option value="15">Moderate Rain (10-20mm)</option>
-                    <option value="50">Heavy Rain (> 50mm)</option>
+                    <option value="0" data-i18n="rain_none">No Rain</option>
+                    <option value="5" data-i18n="rain_light">Light Rain (< 5mm)</option>
+                    <option value="15" data-i18n="rain_mod">Moderate Rain (10-20mm)</option>
+                    <option value="50" data-i18n="rain_heavy">Heavy Rain (> 50mm)</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label class="form-label" data-i18n="water_method">Irrigation Method</label>
                 <select class="form-select" id="irrigationMethod">
-                    <option value="flood">Flood / Furrow</option>
-                    <option value="drip">Drip Irrigation</option>
-                    <option value="sprinkler">Sprinkler</option>
+                    <option value="flood" data-i18n="method_flood">Flood / Furrow</option>
+                    <option value="drip" data-i18n="method_drip">Drip Irrigation</option>
+                    <option value="sprinkler" data-i18n="method_sprinkler">Sprinkler</option>
                 </select>
             </div>
 
@@ -189,19 +195,23 @@
             let grossLiters = Math.round(litersPerAcre / efficiency);
 
             // --- GENERATE OUTPUT ---
+            // Get current language from localStorage or default to 'en'
+            const currentLang = localStorage.getItem('language') || 'en';
+            const t = window.translations[currentLang] || window.translations['en'];
+
             let title = "";
             let desc = "";
             let tips = [];
 
             if (rain > 20) {
-                title = "No Irrigation Needed";
-                desc = "Recent rainfall is sufficient. Ensure good drainage.";
+                title = t.water_res_none_title || "No Irrigation Needed";
+                desc = t.water_res_none_desc || "Recent rainfall is sufficient. Ensure good drainage.";
                 grossLiters = 0;
             } else if (grossLiters === 0) {
-                title = "Soil Moisture Adequate";
-                desc = "No water required today.";
+                title = t.water_res_ok_title || "Soil Moisture Adequate";
+                desc = t.water_res_ok_desc || "No water required today.";
             } else {
-                title = "Irrigation Recommended";
+                title = t.water_res_rec_title || "Irrigation Recommended";
 
                 // Method specific advice
                 if (method === 'drip') {
@@ -209,21 +219,22 @@
                     // Avg drip discharge ~ 10,000 L/hr/acre (depends on hardware, assuming standard)
                     let mins = Math.round((grossLiters / 12000) * 60);
                     if (mins < 20) mins = 20;
-                    desc = `Run drip system for approx <b>${mins} - ${mins + 15} minutes</b> today.`;
+                    desc = (t.water_res_drip_desc || "Run drip system for approx {mins} - {max} minutes today.")
+                        .replace("{mins}", mins).replace("{max}", mins + 15);
                 } else {
-                    desc = `Apply irrigation to replenish moisture.`;
+                    desc = t.water_res_gen_desc || "Apply irrigation to replenish moisture.";
                 }
             }
 
             // Soil specific tips
-            if (soil === 'sandy') tips.push("Sandy soil: Split this amount into two shifts (Morning/Evening) to reduce leaching.");
-            if (soil === 'clay') tips.push("Clay soil: Ensure no water logging. Water slowly.");
+            if (soil === 'sandy') tips.push(t.tip_sandy || "Sandy soil: Split this amount into two shifts (Morning/Evening) to reduce leaching.");
+            if (soil === 'clay') tips.push(t.tip_clay || "Clay soil: Ensure no water logging. Water slowly.");
 
             // Crop specific tips
             if (crop === 'rice') {
-                desc = "Maintain 2-5cm standing water level.";
-                grossLiters = "saturation"; // Override for paddy
-                tips.push("Paddy needs continuous saturation. Adjust inlet based on level.");
+                desc = t.tip_paddy_desc || "Maintain 2-5cm standing water level.";
+                grossLiters = t.val_saturation || "saturation"; // Override for paddy
+                tips.push(t.tip_paddy || "Paddy needs continuous saturation. Adjust inlet based on level.");
             }
 
             // Render
@@ -236,8 +247,8 @@
                 document.getElementById('waterAmount').innerText = "Saturation";
             }
 
-            let tipsHtml = "<strong>Expert Tips:</strong><ul style='margin-top:4px; padding-left: 20px;'>";
-            tips.forEach(t => tipsHtml += `<li>${t}</li>`);
+            let tipsHtml = "<strong>" + (t.expert_tips || "Expert Tips:") + "</strong><ul style='margin-top:4px; padding-left: 20px;'>";
+            tips.forEach(x => tipsHtml += `<li>${x}</li>`);
             tipsHtml += "</ul>";
 
             document.getElementById('planTips').innerHTML = tipsHtml;
