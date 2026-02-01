@@ -1,3 +1,4 @@
 {
-  API_URL = "https://meyer-exec-dreams-plates.trycloudflare.com"
+    "API_URL": "https://meyer-exec-dreams-plates.trycloudflare.com",
+    "DEBUG": true
 }
