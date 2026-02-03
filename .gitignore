@@ -79,7 +79,9 @@ htmlcov/
 .cache/
 
 # Large data files (should be downloaded separately)
-# HWSD2.mdb (uncomment if too large for git)
+HWSD2.mdb
+*.mdb
+backend-server.zip
 
 # Backup files
 *.bak
