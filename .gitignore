@@ -1,22 +1,90 @@
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
 venv/
+env/
+ENV/
+.venv
+
+# Environment variables
+.env
 *.env
+!.env.example
+
+# Database files
+*.db
+*.db-journal
+backend-server/farmx.db
+backend-server/database/farmx.db
+
+# Logs
+*.log
+server.log
+nohup.out
 
 # Android
 .gradle/
 local.properties
 .idea/
-build/
-app/build/
 *.iml
-*.DS_Store
+*.class
+*.dex
+*.apk
+*.aab
+KisanAI/build/
+KisanAI/app/build/
+KisanAI/.gradle/
+KisanAI/local.properties
 
-# Misc
+# IDE
 .vscode/
+.DS_Store
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Node.js (if used)
 node_modules/
-backend-server/database/farmx.db
-nohup.out
-__pycache__/
-*.pyc
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+.dockerignore
+
+# OS specific
+Thumbs.db
+Desktop.ini
+.DS_Store
+._*
+
+# Test files
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Large data files (should be downloaded separately)
+# HWSD2.mdb (uncomment if too large for git)
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Windows specific
+*.lnk

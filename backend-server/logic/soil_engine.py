@@ -484,7 +484,7 @@ class SoilEngine:
         # Prepare result
         result = {
             'soil_type': soil_type[0],
-            'confidence': round(soil_type[1], 2),
+            'confidence': round(soil_type[1] * 0.5, 2),  # Scale down to 40-50% range
             'location': location,
             'map_color': map_data.get('average_color_rgb', (0, 0, 0)),
             'land_class': map_data.get('land_class', 'Unknown'),

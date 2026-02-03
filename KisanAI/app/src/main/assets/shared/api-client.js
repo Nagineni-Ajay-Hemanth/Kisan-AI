@@ -1,112 +1,88 @@
 /**
  * Kisan AI Frontend Configuration
- * Dynamically loaded from GitHub
+ * Fetches config from Cloudflare Workers ONCE on app startup
  */
 
-// Configuration Loader - Fetches config from GitHub
-class ConfigLoader {
-    static GITHUB_CONFIG_URL = "https://raw.githubusercontent.com/Nagineni-Ajay-Hemanth/Kisan-AI/main/config.json";
-    static CACHE_KEY = "farmx_config_cache";
-    static CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache
+// Configuration endpoint
+const CONFIG_URL = "https://kisanai.ajayhemanth90.workers.dev/";
 
-    static async loadConfig() {
-        try {
-            // Check cache first
-            const cached = this.getCachedConfig();
-            if (cached) {
-                console.log("✓ Using cached config from GitHub");
-                return cached;
+// Global variables
+let API_BASE_URL = "http://localhost:8000"; // Default fallback
+let CONFIG_LOADED = false;
+
+// Configuration Loader - Called ONLY ONCE when app starts
+async function loadConfig() {
+    try {
+        console.log("⟳ [ONE-TIME] Fetching config from Cloudflare Workers...");
+        const response = await fetch(CONFIG_URL, {
+            cache: 'no-cache',
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Accept': 'application/json'
             }
+        });
 
-            // Fetch from GitHub
-            console.log("⟳ Fetching fresh config from GitHub...");
-            const response = await fetch(this.GITHUB_CONFIG_URL, {
-                cache: 'no-cache',
-                headers: {
-                    'Cache-Control': 'no-cache'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`GitHub config fetch failed: ${response.status}`);
-            }
-
-            const config = await response.json();
-
-            // Validate config
-            if (!config.API_URL) {
-                throw new Error("Invalid config: API_URL missing");
-            }
-
-            // Cache the config
-            this.cacheConfig(config);
-            console.log("✓ Config loaded from GitHub:", config);
-            return config;
-
-        } catch (error) {
-            console.warn("⚠ Failed to load config from GitHub:", error.message);
-            console.log("→ Falling back to default localhost config");
-            return this.getDefaultConfig();
+        if (!response.ok) {
+            throw new Error(`Config fetch failed: ${response.status}`);
         }
-    }
 
-    static getCachedConfig() {
+        // Get response as text first to debug
+        const text = await response.text();
+        console.log("Raw response:", text);
+
+        // Try to parse JSON
+        let config;
         try {
-            const cached = localStorage.getItem(this.CACHE_KEY);
-            if (!cached) return null;
+            config = JSON.parse(text);
+        } catch (parseError) {
+            console.error("JSON parse error:", parseError.message);
+            console.error("Response text:", text);
+            throw new Error(`Invalid JSON response: ${parseError.message}`);
+        }
 
-            const { config, timestamp } = JSON.parse(cached);
-            const age = Date.now() - timestamp;
+        console.log("✓ Config received:", config);
 
-            if (age < this.CACHE_TTL) {
-                return config;
+        // Extract backend_url from the config
+        if (config.backend_url) {
+            let rawUrl = config.backend_url;
+            console.log("Raw config backend_url:", rawUrl);
+
+            // Clean the URL: It might come with a log prefix like "T17:01:36Z INF | https://..."
+            // We look for the http/https part.
+            const urlMatch = rawUrl.match(/(https?:\/\/[^\s]+)/);
+            if (urlMatch) {
+                API_BASE_URL = urlMatch[0];
+            } else {
+                API_BASE_URL = rawUrl.trim();
             }
 
-            // Cache expired
-            localStorage.removeItem(this.CACHE_KEY);
-            return null;
-        } catch (error) {
-            return null;
-        }
-    }
+            // Remove trailing slash if present to avoid double slashes later
+            API_BASE_URL = API_BASE_URL.replace(/\/$/, "");
 
-    static cacheConfig(config) {
-        try {
-            localStorage.setItem(this.CACHE_KEY, JSON.stringify({
-                config,
-                timestamp: Date.now()
-            }));
-        } catch (error) {
-            console.warn("Failed to cache config:", error);
+            CONFIG_LOADED = true;
+            console.log("✓ Backend URL parsed and set to:", API_BASE_URL);
+            console.log("✓ Config will be used for ALL subsequent API requests");
+        } else {
+            throw new Error("backend_url not found in config");
         }
-    }
 
-    static getDefaultConfig() {
-        return {
-            API_URL: "http://localhost:8000",
-            DEBUG: true
-        };
+        return config;
+    } catch (error) {
+        console.error("⚠ Config loading failed:", error.message);
+        console.log("→ Using fallback URL:", API_BASE_URL);
+        return null;
     }
 }
 
-// Global config object (will be populated after loading)
-window.FARMX_CONFIG = null;
-let API_BASE_URL = "http://localhost:8000"; // Default fallback
-
-// Initialize config asynchronously
-(async function initializeConfig() {
-    window.FARMX_CONFIG = await ConfigLoader.loadConfig();
-    API_BASE_URL = window.FARMX_CONFIG.API_URL;
-
-    if (window.FARMX_CONFIG.DEBUG) {
-        console.log("Kisan AI Config initialized:", window.FARMX_CONFIG);
-    }
-    console.log("Kisan AI API Base URL:", API_BASE_URL);
-})();
+// Initialize config ONCE on app load (this promise is awaited before first API call)
+const configPromise = loadConfig();
 
 class KisanAIApi {
 
     static async request(endpoint, method = "GET", body = null, isFileUpload = false) {
+        // Wait for config to load before making any API request
+        await configPromise;
+
         const url = `${API_BASE_URL}${endpoint}`;
 
         const headers = {};
@@ -128,7 +104,11 @@ class KisanAIApi {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.detail || data.error || "An error occurred");
+                let errorMessage = data.detail || data.error || "An error occurred";
+                if (typeof errorMessage === 'object') {
+                    errorMessage = JSON.stringify(errorMessage);
+                }
+                throw new Error(errorMessage);
             }
             return data;
         } catch (error) {
@@ -151,11 +131,23 @@ class KisanAIApi {
         return await this.request("/auth/login-with-otp", "POST", { mobile, otp });
     }
 
-    static async register(mobile, password, username) {
-        return await this.request("/auth/register", "POST", { mobile, password, username });
+    static async register(mobile, password, username, user_type = 'farmer') {
+        return await this.request("/auth/register", "POST", { mobile, password, username, user_type });
     }
 
     /* --- FEATURES --- */
+    static async createProduct(productData, userId) {
+        return await this.request(`/products/create?user_id=${userId}`, "POST", productData);
+    }
+
+    static async getFarmerProducts(userId) {
+        return await this.request(`/products/farmer/${userId}`);
+    }
+
+    static async deleteProduct(productId, userId) {
+        return await this.request(`/products/${productId}?user_id=${userId}`, "DELETE");
+    }
+
     static async predictDisease(imageFile, userId) {
         const formData = new FormData();
         formData.append("file", imageFile);
@@ -193,7 +185,106 @@ class KisanAIApi {
     static async getWeather(lat, lon) {
         return await this.request(`/api/weather?lat=${lat}&lon=${lon}`);
     }
+
+    /* --- MARKETPLACE --- */
+    static async listProducts(category = null, search = null) {
+        let url = '/products/list';
+        const params = [];
+        if (category) params.push(`category=${encodeURIComponent(category)}`);
+        if (search) params.push(`search=${encodeURIComponent(search)}`);
+        if (params.length > 0) url += `?${params.join('&')}`;
+        return await this.request(url);
+    }
+
+    static async getProduct(productId) {
+        return await this.request(`/products/${productId}`);
+    }
+
+    static async updateProduct(productId, productData, userId) {
+        return await this.request(`/products/${productId}?user_id=${userId}`, "PUT", productData);
+    }
+
+    /* --- ORDERS --- */
+    static async createOrder(orderData, userId) {
+        return await this.request(`/orders/create?user_id=${userId}`, "POST", orderData);
+    }
+
+    static async getCustomerOrders(userId) {
+        return await this.request(`/orders/customer?user_id=${userId}`);
+    }
+
+    static async getFarmerOrders(userId, status = null) {
+        let url = `/orders/farmer?user_id=${userId}`;
+        if (status) url += `&status=${encodeURIComponent(status)}`;
+        return await this.request(url);
+    }
+
+    static async getOrderDetails(orderId, userId) {
+        return await this.request(`/orders/${orderId}/details?user_id=${userId}`);
+    }
+
+    static async acceptOrder(orderId, farmerLat, farmerLon, userId) {
+        return await this.request(`/orders/${orderId}/accept?user_id=${userId}`, "POST", {
+            farmer_lat: farmerLat,
+            farmer_lon: farmerLon
+        });
+    }
+
+    static async rejectOrder(orderId, userId) {
+        return await this.request(`/orders/${orderId}/reject?user_id=${userId}`, "POST");
+    }
+
+    /* --- PAYMENTS --- */
+    static async processPayment(orderId, amount, paymentMethod, userId) {
+        return await this.request(`/payments/process?user_id=${userId}`, "POST", {
+            order_id: orderId,
+            amount: amount,
+            payment_method: paymentMethod
+        });
+    }
+
+    static async getPaymentStatus(orderId, userId) {
+        return await this.request(`/payments/order/${orderId}?user_id=${userId}`);
+    }
+
+    // Community Methods
+    static async createPost(postData, userId) {
+        return await this.request(`/community/posts/create?user_id=${userId}`, "POST", postData);
+    }
+
+    static async listPosts(category = null, limit = 50, offset = 0) {
+        let url = `/community/posts/list?limit=${limit}&offset=${offset}`;
+        if (category) url += `&category=${encodeURIComponent(category)}`;
+        return await this.request(url);
+    }
+
+    static async getPost(postId) {
+        return await this.request(`/community/posts/${postId}`);
+    }
+
+    static async replyToPost(postId, content, userId) {
+        return await this.request(`/community/posts/${postId}/reply?user_id=${userId}`, "POST", {
+            content: content
+        });
+    }
+
+    static async likePost(postId, userId) {
+        return await this.request(`/community/posts/${postId}/like?user_id=${userId}`, "POST");
+    }
+
+    static async likeReply(replyId, userId) {
+        return await this.request(`/community/replies/${replyId}/like?user_id=${userId}`, "POST");
+    }
+
+    static async deletePost(postId, userId) {
+        return await this.request(`/community/posts/${postId}?user_id=${userId}`, "DELETE");
+    }
+
+    static async deleteReply(replyId, userId) {
+        return await this.request(`/community/replies/${replyId}?user_id=${userId}`, "DELETE");
+    }
 }
+
 
 // User Session Management
 const SessionManager = {

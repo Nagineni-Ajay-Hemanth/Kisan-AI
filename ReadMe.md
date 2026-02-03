@@ -110,6 +110,97 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ---
 
+## 🐳 Docker Deployment (Recommended)
+
+The easiest way to run the Kisan-AI backend is using Docker. This method ensures consistent environments across all platforms.
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) installed
+- [Docker Compose](https://docs.docker.com/compose/install/) installed
+
+### Quick Start
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/Nagineni-Ajay-Hemanth/Kisan-AI.git
+cd Kisan-AI
+
+# 2. Create environment file
+cp .env.example .env
+
+# 3. Edit .env and add your API keys
+nano .env  # or use any text editor
+
+# 4. Build and run with Docker Compose
+docker-compose up -d
+
+# 5. Check logs
+docker-compose logs -f backend
+
+# 6. Access the API
+# Backend: http://localhost:8000
+# API Docs: http://localhost:8000/docs
+```
+
+### Environment Variables
+
+Edit the `.env` file with your configuration:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+WEATHER_API_KEY=your_weather_api_key_here
+PORT=8000
+DEBUG=false
+```
+
+### Docker Commands
+
+```bash
+# Start services
+docker-compose up -d
+
+# Stop services
+docker-compose down
+
+# View logs
+docker-compose logs -f
+
+# Rebuild after code changes
+docker-compose up -d --build
+
+# Remove everything (including volumes)
+docker-compose down -v
+```
+
+### Manual Docker Build
+
+If you prefer to use Docker without Compose:
+
+```bash
+# Build the image
+docker build -t kisan-ai:latest .
+
+# Run the container
+docker run -d \
+  --name kisan-ai-backend \
+  -p 8000:8000 \
+  -e GEMINI_API_KEY=your_key_here \
+  -v $(pwd)/backend-server/farmx.db:/app/farmx.db \
+  -v $(pwd)/HWSD2.mdb:/app/HWSD2.mdb \
+  kisan-ai:latest
+
+# View logs
+docker logs -f kisan-ai-backend
+
+# Stop container
+docker stop kisan-ai-backend
+
+# Remove container
+docker rm kisan-ai-backend
+```
+
+---
 
 ## 👥 Team
 

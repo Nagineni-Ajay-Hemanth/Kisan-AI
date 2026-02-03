@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kisan AI - Customer Dashboard</title>
+    <link rel="stylesheet" href="shared/style.css">
+    <script src="shared/api-client.js"></script>
+    <script src="shared/translations.js"></script>
+    <script src="shared/language-manager.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="header-brand">
+            <img src="shared/assets/icon.png" alt="Kisan AI logo">
+            <h3>Kisan AI</h3>
+        </div>
+        <nav class="header-nav">
+            <button class="nav-icon-btn" onclick="toggleLanguageModal()"><img src="shared/assets/language.png"
+                    alt="language"></button>
+            <button class="nav-icon-btn" onclick="SessionManager.logout()"><img src="shared/assets/logout.png"
+                    alt="logout"></button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- Greetings Section -->
+        <section class="greetings-section">
+            <h1 class="greetings-title" id="greetingUser">Hello, Customer</h1>
+            <p class="greetings-subtitle">Welcome to Kisan AI Marketplace</p>
+
+            <div class="weather-widget" onclick="window.location.href='weather/index.html'" style="cursor: pointer;">
+                <h5 id="wConditionHome">Loading Weather... ☁️</h5>
+                <p id="wTempHome" style="opacity: 0.9; margin-top: 5px;">--°C • Humidity: --%</p>
+            </div>
+        </section>
+
+        <!-- Quick Access Grid -->
+        <section style="margin-top: 40px;">
+            <h4 class="section-title">Marketplace</h4>
+
+            <div class="quick-access-grid">
+                <a href="customer/browse-products.html" class="feature-card">
+                    <img src="shared/assets/sell.png" alt="Browse">
+                    <span>Browse Products</span>
+                </a>
+
+                <a href="customer/my-orders.html" class="feature-card">
+                    <img src="shared/assets/advice.png" alt="Orders">
+                    <span>My Orders</span>
+                </a>
+
+                <a href="weather/index.html" class="feature-card">
+                    <img src="shared/assets/weather.png" alt="Weather">
+                    <span>Weather Info</span>
+                </a>
+
+                <a href="schemes/index.html" class="feature-card">
+                    <img src="shared/assets/protect.png" alt="Info">
+                    <span>Information</span>
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <!-- Language Modal -->
+    <div id="languageModal" class="lang-modal">
+        <div class="lang-modal-content">
+            <span class="close-modal" onclick="toggleLanguageModal()">&times;</span>
+            <h3 style="margin-bottom: 12px; font-size:1.2rem;">Select Language</h3>
+            <div class="lang-options">
+                <button onclick="setLanguage('en')">English</button>
+                <button onclick="setLanguage('hi')">Hindi (हिंदी)</button>
+                <button onclick="setLanguage('te')">Telugu (తెలుగు)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        SessionManager.requireAuth();
+
+        // Check if user is actually a customer
+        const user = SessionManager.getUser();
+        if (user && user.user_type === 'farmer') {
+            // Redirect farmers to farmer dashboard
+            window.location.href = 'index.html';
+        }
+
+        // Update greeting
+        if (user) {
+            document.getElementById('greetingUser').textContent = `Hello, ${user.username}!`;
+        }
+
+        // Load weather
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                try {
+                    const weather = await KisanAIApi.getWeather(position.coords.latitude, position.coords.longitude);
+                    document.getElementById('wConditionHome').textContent = `${weather.condition} ${weather.icon}`;
+                    document.getElementById('wTempHome').textContent = `${weather.temperature}°C • Humidity: ${weather.humidity}%`;
+                } catch (error) {
+                    console.error('Weather error:', error);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

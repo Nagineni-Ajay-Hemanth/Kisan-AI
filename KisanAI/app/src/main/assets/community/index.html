@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Community - Kisan AI</title>
+    <link rel="stylesheet" href="../shared/style.css">
+    <script src="../shared/api-client.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(85, 139, 47, 0.3);
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .category-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-question {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .badge-tip {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .badge-discussion {
+            background: #E3F2FD;
+            color: #1565C0;
+        }
+
+        .post-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 8px 0;
+            line-height: 1.4;
+        }
+
+        .post-content {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .post-author {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .post-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(85, 139, 47, 0.4);
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            opacity: 0.4;
+            margin-bottom: 16px;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-brand">
+            <img src="../shared/assets/icon.png" alt="Kisan AI">
+            <h3>🌾 Farmer Community</h3>
+        </div>
+        <nav class="header-nav">
+            <button class="nav-icon-btn" onclick="window.location.href='../index.html'">
+                <img src="../shared/assets/advice.png" alt="back">
+            </button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="category-tabs">
+            <button class="tab-btn active" onclick="filterByCategory('all')">🌐 All</button>
+            <button class="tab-btn" onclick="filterByCategory('question')">🌾 Questions</button>
+            <button class="tab-btn" onclick="filterByCategory('tip')">💡 Tips</button>
+            <button class="tab-btn" onclick="filterByCategory('discussion')">💬 Discussions</button>
+        </div>
+
+        <div id="postsContainer">
+            <!-- Skeleton loaders -->
+            <div class="post-card">
+                <div class="skeleton" style="height: 20px; width: 30%; margin-bottom: 12px;"></div>
+                <div class="skeleton" style="height: 16px; width: 100%; margin-bottom: 8px;"></div>
+                <div class="skeleton" style="height: 16px; width: 80%;"></div>
+            </div>
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-icon">🌾</div>
+            <h3>No Posts Yet</h3>
+            <p>Be the first to share your farming knowledge!</p>
+        </div>
+    </div>
+
+    <button class="fab" onclick="window.location.href='create-post.html'" title="Ask Question">+</button>
+
+    <script>
+        SessionManager.requireAuth();
+        const user = SessionManager.getUser();
+
+        if (user.user_type !== 'farmer') {
+            alert('Only farmers can access the community');
+            window.location.href = '../customer-index.html';
+        }
+
+        let currentCategory = 'all';
+
+        async function loadPosts(category = 'all') {
+            const container = document.getElementById('postsContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            try {
+                const data = await KisanAIApi.listPosts(category === 'all' ? null : category);
+
+                if (data.posts.length === 0) {
+                    container.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+                container.innerHTML = data.posts.map(post => renderPostCard(post)).join('');
+
+            } catch (error) {
+                console.error('Error loading posts:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">⚠️</span>
+                        <h3>Something went wrong</h3>
+                        <p>${error.message}</p>
+                        <button class="btn-primary" style="margin-top: 16px; width: auto;" onclick="loadPosts(currentCategory)">Try Again</button>
+                    </div>
+                `;
+            }
+        }
+
+        function renderPostCard(post) {
+            const categoryIcons = {
+                'question': '🌾',
+                'tip': '💡',
+                'discussion': '💬'
+            };
+
+            const icon = categoryIcons[post.category] || '📝';
+            const timeAgo = getTimeAgo(post.created_at);
+
+            return `
+                <div class="post-card" onclick="viewPost(${post.id})">
+                    <div class="post-header">
+                        <span class="category-badge badge-${post.category}">${icon} ${post.category}</span>
+                    </div>
+                    <div class="post-title">${escapeHtml(post.title)}</div>
+                    <div class="post-content">${escapeHtml(post.content)}</div>
+                    <div class="post-meta">
+                        <div class="post-author">
+                            <span>👨‍🌾</span>
+                            <span>${escapeHtml(post.farmer_name)}</span>
+                            <span>•</span>
+                            <span>${timeAgo}</span>
+                        </div>
+                        <div class="post-stats">
+                            <div class="stat-item">
+                                <span>👍</span>
+                                <span>${post.likes_count || 0}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span>💬</span>
+                                <span>${post.replies_count || 0}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterByCategory(category) {
+            currentCategory = category;
+            // Update active tab
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            loadPosts(category);
+        }
+
+        function viewPost(postId) {
+            window.location.href = `post-details.html?id=${postId}`;
+        }
+
+        function getTimeAgo(timestamp) {
+            const now = new Date();
+            const past = new Date(timestamp);
+            const diffMs = now - past;
+            const diffMins = Math.floor(diffMs / 60000);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) return `${diffHours}h ago`;
+
+            const diffDays = Math.floor(diffHours / 24);
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays} days ago`;
+
+            return past.toLocaleDateString();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initial load
+        loadPosts('all');
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => loadPosts(currentCategory), 30000);
+    </script>
+</body>
+
+</html>

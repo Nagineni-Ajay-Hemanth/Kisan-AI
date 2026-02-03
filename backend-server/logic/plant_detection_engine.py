@@ -9,6 +9,7 @@ warnings.filterwarnings('ignore')
 from scipy import spatial
 from sklearn.cluster import KMeans
 import sqlite3
+import os
 
 
 class AutoPlantDiseaseDetector:
@@ -296,7 +297,10 @@ class AutoPlantDiseaseDetector:
     def _init_db(self):
         """Initialize SQLite database for storing results"""
         try:
-            conn = sqlite3.connect('farmx.db')
+            # Use the same database path as main.py
+            BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            DB_PATH = os.path.join(BASE_DIR, "database", "farmx.db")
+            conn = sqlite3.connect(DB_PATH)
             cursor = conn.cursor()
             
             # Create detections table
@@ -323,7 +327,10 @@ class AutoPlantDiseaseDetector:
     def save_results_to_db(self, results):
         """Save analysis results to SQLite database"""
         try:
-            conn = sqlite3.connect('farmx.db')
+            # Use the same database path as main.py
+            BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            DB_PATH = os.path.join(BASE_DIR, "database", "farmx.db")
+            conn = sqlite3.connect(DB_PATH)
             cursor = conn.cursor()
             
             # Extract basic info
@@ -911,8 +918,8 @@ class AutoPlantDiseaseDetector:
             scores[plant] = min(scores[plant] / max_possible, 0.95)
         
         # 4. Fix Plant Identification Confidence Inflation
-        # Normalize to 0-1 range but CAP at 0.85 to avoid overconfidence without ML
-        confidence = min((max_score / max_possible), 0.85)
+        # Normalize to 0-1 range but CAP at 0.50 to avoid overconfidence without ML
+        confidence = min((max_score / max_possible), 0.50)
         
         return top_plant, confidence, dict(sorted(scores.items(), key=lambda x: x[1], reverse=True)[:3])
     

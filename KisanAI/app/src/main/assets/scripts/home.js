@@ -121,6 +121,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // Let's stick to name insertion into fixed element or update via i18n
         // Ideally: window.translations[lang]['greeting_morning']...
         document.getElementById('greetingUser').textContent = `${timeGreeting}, ${user.username}`;
+
+        // Show Farmer Tools if applicable
+        if (user.user_type === 'farmer') {
+            const farmerSection = document.getElementById('farmerToolsSection');
+            if (farmerSection) {
+                farmerSection.style.display = 'block';
+                // Move it to top for better visibility (optional but good)
+                // const container = document.querySelector('.container');
+                // const quickAccess = document.querySelector('.quick-access-grid').parentElement; // This is a bit risky with selector structure
+                // But simplified: just show it.
+            }
+        }
     }
 
     // Fetch Weather for Home Widget

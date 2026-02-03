@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ask Question - Kisan AI</title>
+    <link rel="stylesheet" href="../shared/style.css">
+    <script src="../shared/api-client.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .category-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .category-option {
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .category-option:hover {
+            border-color: var(--primary);
+        }
+
+        .category-option.selected {
+            border-color: var(--primary);
+            background: rgba(85, 139, 47, 0.1);
+        }
+
+        .category-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .category-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(85, 139, 47, 0.3);
+        }
+
+        .btn-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-submit:not(:disabled):active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-brand">
+            <img src="../shared/assets/icon.png" alt="Kisan AI">
+            <h3>Ask Question</h3>
+        </div>
+        <nav class="header-nav">
+            <button class="nav-icon-btn" onclick="window.location.href='index.html'">
+                <img src="../shared/assets/advice.png" alt="back">
+            </button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="form-card">
+            <form id="postForm">
+                <div class="form-group">
+                    <label class="form-label">Category *</label>
+                    <div class="category-selector">
+                        <div class="category-option" onclick="selectCategory('question')">
+                            <div class="category-icon">🌾</div>
+                            <div class="category-name">Question</div>
+                        </div>
+                        <div class="category-option" onclick="selectCategory('tip')">
+                            <div class="category-icon">💡</div>
+                            <div class="category-name">Tip</div>
+                        </div>
+                        <div class="category-option" onclick="selectCategory('discussion')">
+                            <div class="category-icon">💬</div>
+                            <div class="category-name">Discussion</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="category" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Title *</label>
+                    <input type="text" id="title" class="form-input"
+                        placeholder="e.g., How to control pests in tomato plants?" required maxlength="200">
+                    <div class="char-count"><span id="titleCount">0</span>/200</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description *</label>
+                    <textarea id="content" class="form-textarea"
+                        placeholder="Describe your question or share your knowledge in detail..." required
+                        maxlength="2000"></textarea>
+                    <div class="char-count"><span id="contentCount">0</span>/2000</div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">Post to Community</button>
+                <p id="errorMsg" style="color: #d32f2f; margin-top: 15px; display: none;"></p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        SessionManager.requireAuth();
+        const user = SessionManager.getUser();
+
+        if (user.user_type !== 'farmer') {
+            alert('Only farmers can post to the community');
+            window.location.href = '../customer-index.html';
+        }
+
+        let selectedCategory = null;
+
+        function selectCategory(category) {
+            selectedCategory = category;
+            document.getElementById('category').value = category;
+
+            // Update UI
+            document.querySelectorAll('.category-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            event.target.closest('.category-option').classList.add('selected');
+        }
+
+        // Character counters
+        document.getElementById('title').addEventListener('input', (e) => {
+            document.getElementById('titleCount').textContent = e.target.value.length;
+        });
+
+        document.getElementById('content').addEventListener('input', (e) => {
+            document.getElementById('contentCount').textContent = e.target.value.length;
+        });
+
+        // Form submission
+        document.getElementById('postForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const errorMsg = document.getElementById('errorMsg');
+            const submitBtn = document.getElementById('submitBtn');
+            errorMsg.style.display = 'none';
+
+            const title = document.getElementById('title').value.trim();
+            const content = document.getElementById('content').value.trim();
+            const category = document.getElementById('category').value;
+
+            // Validation
+            if (!category) {
+                errorMsg.textContent = 'Please select a category';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            if (!title) {
+                errorMsg.textContent = 'Please enter a title';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            if (!content) {
+                errorMsg.textContent = 'Please enter a description';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Posting...';
+
+            try {
+                const data = await KisanAIApi.createPost({
+                    title: title,
+                    content: content,
+                    category: category
+                }, user.id);
+
+                // Success - redirect to post details
+                window.location.href = `post-details.html?id=${data.post_id}`;
+
+            } catch (error) {
+                console.error('Error creating post:', error);
+                errorMsg.textContent = error.message || 'Failed to create post';
+                errorMsg.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Post to Community';
+            }
+        });
+    </script>
+</body>
+
+</html>

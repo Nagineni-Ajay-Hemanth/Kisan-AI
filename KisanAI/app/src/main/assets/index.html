@@ -51,84 +51,134 @@
         </div>
     </div>
 
-    <!-- Script for Chat Logic -->
-    <script src="scripts/home.js"></script>
+    <!-- Script for Chat Logic - Moved to end -->
 
-    <body>
-
-        <header>
-            <div class="header-brand">
-                <img src="shared/assets/icon.png" alt="FarmX logo">
-                <h3>Kisan AI</h3>
-            </div>
-            <nav class="header-nav">
-                <button class="nav-icon-btn" onclick="toggleNotificationModal()"><img src="shared/assets/notify.png"
-                        alt="notifications"></button>
-                <button class="nav-icon-btn" onclick="toggleLanguageModal()"><img src="shared/assets/language.png"
-                        alt="language"></button>
-                <button class="nav-icon-btn" onclick="SessionManager.logout()"><img src="shared/assets/logout.png"
-                        alt="logout"></button>
-            </nav>
-        </header>
-
-        <div class="container">
-
-            <!-- Greetings Section -->
-            <section class="greetings-section">
-                <h1 class="greetings-title" id="greetingUser">Hello, Farmer</h1>
-                <p class="greetings-subtitle" data-i18n="home_subtitle">Here's what's happening on your farm today.</p>
-
-                <div class="weather-widget" onclick="window.location.href='weather/index.html'"
-                    style="cursor: pointer;">
-                    <h5 id="wConditionHome" data-i18n="weather_loading">Loading Weather... ☁️</h5>
-                    <p id="wTempHome" style="opacity: 0.9; margin-top: 5px;">--°C &bull; Humidity: --%</p>
-                </div>
-            </section>
-
-            <!-- Quick Access Grid -->
-            <section style="margin-top: 40px;">
-                <h4 class="section-title" data-i18n="quick_access">Quick Access</h4>
-
-                <div class="quick-access-grid">
-                    <a href="disease/index.html" class="feature-card">
-                        <img src="shared/assets/disease.png" alt="Disease">
-                        <span data-i18n="disease_title">Scan Disease</span>
-                    </a>
-
-                    <a href="advice/index.html" class="feature-card">
-                        <img src="shared/assets/advice.png" alt="Advice">
-                        <span data-i18n="advice_title">Expert Advice</span>
-                    </a>
-
-                    <a href="fertilizer/index.html" class="feature-card">
-                        <img src="shared/assets/fertilizer.png" alt="Fertilizer">
-                        <span data-i18n="fertilizer_title">Fertilizer</span>
-                    </a>
-
-                    <a href="market/index.html" class="feature-card">
-                        <img src="shared/assets/sell.png" alt="Market">
-                        <span data-i18n="market_title">Market Prices</span>
-                    </a>
-
-                    <a href="schemes/index.html" class="feature-card">
-                        <img src="shared/assets/protect.png" alt="Schemes">
-                        <span data-i18n="quick_schemes">Govt Schemes</span>
-                    </a>
-
-                    <a href="water/index.html" class="feature-card">
-                        <img src="shared/assets/weather.png" alt="Water">
-                        <span data-i18n="water_title">Water Plan</span>
-                    </a>
-
-                    <a href="info/index.html" class="feature-card">
-                        <img src="shared/assets/fertilizer.png" alt="Info">
-                        <span data-i18n="quick_guide">Farming Guide</span>
-                    </a>
-                </div>
-            </section>
+    <header>
+        <div class="header-brand">
+            <img src="shared/assets/icon.png" alt="FarmX logo">
+            <h3>Kisan AI</h3>
         </div>
+        <nav class="header-nav">
+            <button class="nav-icon-btn" onclick="toggleNotificationModal()"><img src="shared/assets/notify.png"
+                    alt="notifications"></button>
+            <button class="nav-icon-btn" onclick="toggleLanguageModal()"><img src="shared/assets/language.png"
+                    alt="language"></button>
+            <button class="nav-icon-btn" onclick="SessionManager.logout()"><img src="shared/assets/logout.png"
+                    alt="logout"></button>
+        </nav>
+    </header>
 
-        <!-- ... -->
-    </body>
+    <div class="container">
+
+        <!-- Greetings Section -->
+        <section class="greetings-section">
+            <h1 class="greetings-title" id="greetingUser">Hello, Farmer</h1>
+            <p class="greetings-subtitle" data-i18n="home_subtitle">Here's what's happening on your farm today.</p>
+
+            <div class="weather-widget" onclick="window.location.href='weather/index.html'" style="cursor: pointer;">
+                <h5 id="wConditionHome" data-i18n="weather_loading">Loading Weather... ☁️</h5>
+                <p id="wTempHome" style="opacity: 0.9; margin-top: 5px;">--°C &bull; Humidity: --%</p>
+            </div>
+        </section>
+
+        <!-- Quick Access Grid -->
+        <section style="margin-top: 40px;">
+            <h4 class="section-title" data-i18n="quick_access">Quick Access</h4>
+
+            <div class="quick-access-grid">
+                <a href="disease/index.html" class="feature-card">
+                    <img src="shared/assets/disease.png" alt="Disease">
+                    <span data-i18n="disease_title">Scan Disease</span>
+                </a>
+
+                <a href="advice/index.html" class="feature-card">
+                    <img src="shared/assets/advice.png" alt="Advice">
+                    <span data-i18n="advice_title">Expert Advice</span>
+                </a>
+
+                <a href="fertilizer/index.html" class="feature-card">
+                    <img src="shared/assets/fertilizer.png" alt="Fertilizer">
+                    <span data-i18n="fertilizer_title">Fertilizer</span>
+                </a>
+
+                <a href="customer/browse-products.html" class="feature-card">
+                    <img src="shared/assets/sell.png" alt="Market">
+                    <span data-i18n="market_title">Market Prices</span>
+                </a>
+
+                <a href="schemes/index.html" class="feature-card">
+                    <img src="shared/assets/protect.png" alt="Schemes">
+                    <span data-i18n="quick_schemes">Govt Schemes</span>
+                </a>
+
+                <a href="water/index.html" class="feature-card">
+                    <img src="shared/assets/weather.png" alt="Water">
+                    <span data-i18n="water_title">Water Plan</span>
+                </a>
+
+                <a href="info/index.html" class="feature-card">
+                    <img src="shared/assets/fertilizer.png" alt="Info">
+                    <span data-i18n="quick_guide">Farming Guide</span>
+                </a>
+
+                <!-- Marketplace Features -->
+            </div>
+        </section>
+
+        <!-- Farmer Tools Section (Hidden by default) -->
+        <section id="farmerToolsSection" style="margin-top: 40px; display: none;">
+            <h4 class="section-title">Farmer Tools</h4>
+            <div class="quick-access-grid">
+                <a href="farmer/upload-product.html" class="feature-card" style="border: 2px solid var(--primary);">
+                    <img src="shared/assets/sell.png" alt="Upload Product">
+                    <span style="color: var(--primary); font-weight: 700;">Upload Product</span>
+                </a>
+
+                <a href="farmer/my-products.html" class="feature-card">
+                    <img src="shared/assets/fertilizer.png" alt="My Products">
+                    <span>My Products</span>
+                </a>
+
+                <a href="farmer/my-orders.html" class="feature-card">
+                    <img src="shared/assets/advice.png" alt="My Orders">
+                    <span>My Orders</span>
+                </a>
+
+                <a href="community/index.html" class="feature-card" style="border: 2px solid #4CAF50;">
+                    <img src="shared/assets/advice.png" alt="Community">
+                    <span style="color: #4CAF50; font-weight: 700;">🌾 Community</span>
+                </a>
+            </div>
+        </section>
+        </section>
+    </div>
+
+    <!-- ... -->
+    <!-- Footer Navigation -->
+    <footer class="bottom-nav">
+        <a href="index.html" class="nav-item active">
+            <img src="shared/assets/home.png" alt="Home">
+            <span>Home</span>
+        </a>
+        <a href="weather/index.html" class="nav-item">
+            <img src="shared/assets/weather.png" alt="Weather">
+            <span>Weather</span>
+        </a>
+        <a href="disease/index.html" class="nav-item">
+            <img src="shared/assets/scan.png" alt="Scan">
+            <span>Scan</span>
+        </a>
+        <a href="farmer/upload-product.html" class="nav-item">
+            <img src="shared/assets/sell.png" alt="Sell">
+            <span>Sell</span>
+        </a>
+        <a href="farmer/my-orders.html" class="nav-item">
+            <img src="shared/assets/advice.png" alt="Orders">
+            <span>Orders</span>
+        </a>
+    </footer>
+
+    <script src="scripts/home.js"></script>
+</body>
 
 </html>

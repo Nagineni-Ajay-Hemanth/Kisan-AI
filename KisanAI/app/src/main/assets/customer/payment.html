@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - Kisan AI</title>
+    <link rel="stylesheet" href="../shared/style.css">
+    <script src="../shared/api-client.js"></script>
+    <style>
+        .payment-container {
+            max-width: 500px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-method {
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .payment-method:hover {
+            border-color: var(--primary);
+        }
+
+        .payment-method.selected {
+            border-color: var(--primary);
+            background: #E3F2FD;
+        }
+
+        .payment-method h4 {
+            margin: 0 0 8px 0;
+            color: var(--primary);
+        }
+
+        .payment-method p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .price-summary {
+            background: #f9f9f9;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+        }
+
+        .total-row {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+            padding-top: 12px;
+            border-top: 2px solid #ddd;
+            margin-top: 12px;
+        }
+
+        .payment-note {
+            background: #FFF3E0;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 16px 0;
+            color: #F57C00;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-brand">
+            <img src="../shared/assets/icon.png" alt="Kisan AI">
+            <h3>Payment</h3>
+        </div>
+        <nav class="header-nav">
+            <button class="nav-icon-btn" onclick="window.history.back()">
+                <img src="../shared/assets/advice.png" alt="back">
+            </button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="payment-container">
+            <h2 style="color: var(--primary); margin-bottom: 20px;">Choose Payment Method</h2>
+
+            <div class="price-summary">
+                <h4 style="margin: 0 0 12px 0; color: var(--text-main);">Order Summary</h4>
+                <div class="price-row">
+                    <span>Product Price:</span>
+                    <span id="productPrice">₹0</span>
+                </div>
+                <div class="price-row">
+                    <span>Delivery Charge:</span>
+                    <span id="deliveryCharge">₹0</span>
+                </div>
+                <div class="price-row total-row">
+                    <span>Total Amount:</span>
+                    <span id="totalAmount">₹0</span>
+                </div>
+            </div>
+
+            <div class="payment-method" id="codMethod" onclick="selectPaymentMethod('cod')">
+                <h4>💵 Cash on Delivery (COD)</h4>
+                <p>Pay delivery charge now (₹<span id="codNow">0</span>)</p>
+                <p>Pay remaining amount on delivery (₹<span id="codLater">0</span>)</p>
+            </div>
+
+            <div class="payment-method" id="fullMethod" onclick="selectPaymentMethod('full')">
+                <h4>💳 Pay Full Amount</h4>
+                <p>Pay complete amount now (₹<span id="fullAmount">0</span>)</p>
+                <p style="color: #4CAF50; margin-top: 4px;">✓ Recommended for faster delivery</p>
+            </div>
+
+            <div class="payment-note" id="paymentNote" style="display: none;"></div>
+
+            <button class="btn-primary" id="payBtn" onclick="processPayment()" disabled>
+                Proceed to Payment
+            </button>
+        </div>
+    </div>
+
+    <script>
+        SessionManager.requireAuth();
+        const user = SessionManager.getUser();
+
+        if (user.user_type !== 'customer') {
+            window.location.href = '../index.html';
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('order_id');
+        const totalPrice = parseFloat(urlParams.get('total'));
+        const deliveryCharge = parseFloat(urlParams.get('delivery'));
+
+        if (!orderId || !totalPrice || !deliveryCharge) {
+            alert('Invalid payment details');
+            window.history.back();
+        }
+
+        let selectedMethod = null;
+
+        // Initialize prices
+        const productPrice = totalPrice - deliveryCharge;
+        document.getElementById('productPrice').textContent = '₹' + productPrice.toFixed(2);
+        document.getElementById('deliveryCharge').textContent = '₹' + deliveryCharge.toFixed(2);
+        document.getElementById('totalAmount').textContent = '₹' + totalPrice.toFixed(2);
+        document.getElementById('codNow').textContent = deliveryCharge.toFixed(2);
+        document.getElementById('codLater').textContent = productPrice.toFixed(2);
+        document.getElementById('fullAmount').textContent = totalPrice.toFixed(2);
+
+        function selectPaymentMethod(method) {
+            selectedMethod = method;
+
+            // Update UI
+            document.getElementById('codMethod').classList.remove('selected');
+            document.getElementById('fullMethod').classList.remove('selected');
+            document.getElementById(method + 'Method').classList.add('selected');
+
+            // Update note
+            const note = document.getElementById('paymentNote');
+            note.style.display = 'block';
+
+            if (method === 'cod') {
+                note.innerHTML = `
+                    <strong>Cash on Delivery Selected</strong><br>
+                    You will pay ₹${deliveryCharge.toFixed(2)} now (delivery charge)<br>
+                    Remaining ₹${productPrice.toFixed(2)} will be paid on delivery
+                `;
+            } else {
+                note.innerHTML = `
+                    <strong>Full Payment Selected</strong><br>
+                    You will pay the complete amount of ₹${totalPrice.toFixed(2)} now
+                `;
+            }
+
+            // Enable payment button
+            document.getElementById('payBtn').disabled = false;
+        }
+
+        async function processPayment() {
+            if (!selectedMethod) {
+                alert('Please select a payment method');
+                return;
+            }
+
+            const payBtn = document.getElementById('payBtn');
+            payBtn.disabled = true;
+            payBtn.textContent = 'Processing...';
+
+            try {
+                const amount = selectedMethod === 'cod' ? deliveryCharge : totalPrice;
+
+                const response = await fetch(`${API_BASE_URL}/payments/process?user_id=${user.id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        order_id: parseInt(orderId),
+                        payment_method: selectedMethod,
+                        amount: amount
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Payment failed');
+                }
+
+                // Simulate payment processing
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                alert(`Payment Successful!\\n\\nTransaction ID: ${data.transaction_id}\\nAmount Paid: ₹${amount.toFixed(2)}\\n\\n${selectedMethod === 'cod' ? 'Remaining amount will be collected on delivery' : 'Full payment completed'}`);
+
+                window.location.href = 'my-orders.html';
+            } catch (error) {
+                console.error('Payment error:', error);
+                alert('Payment failed: ' + error.message);
+                payBtn.disabled = false;
+                payBtn.textContent = 'Proceed to Payment';
+            }
+        }
+    </script>
+</body>
+
+</html>

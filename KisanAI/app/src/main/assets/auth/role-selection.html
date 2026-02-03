@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kisan AI - Welcome</title>
+    <link rel="stylesheet" href="../shared/style.css">
+    <style>
+        .role-selection-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .role-header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .role-header img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 16px;
+        }
+
+        .role-header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .role-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .role-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .role-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .role-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+        }
+
+        .role-card img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+        }
+
+        .role-card h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .role-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .role-card.farmer {
+            border-top: 4px solid #4CAF50;
+        }
+
+        .role-card.customer {
+            border-top: 4px solid #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="role-selection-container">
+        <div class="role-header">
+            <img src="../shared/assets/icon.png" alt="Kisan AI Logo">
+            <h1>Welcome to Kisan AI</h1>
+            <p>Har Kisan Ka Digital Saathi</p>
+        </div>
+
+        <div class="role-cards">
+            <div class="role-card farmer" onclick="selectRole('farmer')">
+                <img src="../shared/assets/disease.png" alt="Farmer">
+                <h2>I'm a Farmer</h2>
+                <p>Access farming tools, disease detection, expert advice, and more</p>
+            </div>
+
+            <div class="role-card customer" onclick="selectRole('customer')">
+                <img src="../shared/assets/sell.png" alt="Customer">
+                <h2>I'm a Customer</h2>
+                <p>Browse and buy fresh products directly from farmers</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectRole(role) {
+            if (role === 'farmer') {
+                window.location.href = 'farmer-login.html';
+            } else if (role === 'customer') {
+                window.location.href = 'customer-login.html';
+            }
+        }
+    </script>
+</body>
+</html>

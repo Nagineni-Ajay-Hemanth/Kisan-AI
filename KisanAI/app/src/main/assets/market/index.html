@@ -202,76 +202,37 @@
         <span style="font-size: 1.2rem;">+</span> <span data-i18n="market_sell_btn">Sell Produce</span>
     </button>
 
+    <script src="../shared/api-client.js"></script>
     <script>
-        const products = [
-            { nameKey: "prod_tomato", defaultName: "Tomato (Desi)", price: "₹25", unit: "/ kg", cat: "veg", icon: "🍅" },
-            { nameKey: "prod_potato", defaultName: "Potato", price: "₹18", unit: "/ kg", cat: "veg", icon: "🥔" },
-            { nameKey: "prod_onion", defaultName: "Onion (Red)", price: "₹30", unit: "/ kg", cat: "veg", icon: "🧅" },
-            { nameKey: "prod_rice_bas", defaultName: "Rice (Basmati)", price: "₹80", unit: "/ kg", cat: "grain", icon: "🍚" },
-            { nameKey: "prod_wheat_shar", defaultName: "Wheat (Sharbati)", price: "₹35", unit: "/ kg", cat: "grain", icon: "🌾" },
-            { nameKey: "prod_carrot", defaultName: "Carrots", price: "₹40", unit: "/ kg", cat: "veg", icon: "🥕" },
-            { nameKey: "prod_spinach", defaultName: "Spinach", price: "₹15", unit: "/ bunch", cat: "veg", icon: "🥬" },
-            { nameKey: "prod_mango", defaultName: "Mango (Alphonso)", price: "₹150", unit: "/ dozen", cat: "fruit", icon: "🥭" },
-            { nameKey: "prod_banana", defaultName: "Banana", price: "₹40", unit: "/ dozen", cat: "fruit", icon: "🍌" },
-            { nameKey: "prod_cotton", defaultName: "Cotton", price: "₹6,000", unit: "/ quintal", cat: "commercial", icon: "☁️" },
-            { nameKey: "prod_sugar", defaultName: "Sugarcane", price: "₹350", unit: "/ quintal", cat: "commercial", icon: "🎋" },
-            { nameKey: "prod_corn", defaultName: "Corn / Maize", price: "₹22", unit: "/ kg", cat: "grain", icon: "🌽" },
-            { nameKey: "prod_apple", defaultName: "Green Apple", price: "₹120", unit: "/ kg", cat: "fruit", icon: "🍏" },
-            { nameKey: "prod_grapes", defaultName: "Grapes", price: "₹80", unit: "/ kg", cat: "fruit", icon: "🍇" },
-            { nameKey: "prod_chilli", defaultName: "Red Chillies", price: "₹180", unit: "/ kg", cat: "commercial", icon: "🌶️" },
-            { nameKey: "prod_garlic", defaultName: "Garlic", price: "₹150", unit: "/ kg", cat: "veg", icon: "🧄" },
-        ];
+        // Smart redirect based on user type
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = SessionManager.getUser();
 
-        function renderProducts(filterText = "", filterCategory = "all") {
-            const grid = document.getElementById('productGrid');
-            grid.innerHTML = "";
-            const currentLang = localStorage.getItem('language') || 'en';
-            const t = window.translations[currentLang] || window.translations['en'];
+            if (!user) {
+                // Not logged in, redirect to login
+                window.location.href = '../auth/login.html';
+                return;
+            }
 
-            products.forEach(p => {
-                const displayName = t[p.nameKey] || p.defaultName;
-                const matchesText = displayName.toLowerCase().includes(filterText.toLowerCase());
-                const matchesCat = filterCategory === "all" || p.cat === filterCategory;
+            // Show loading state
+            const container = document.querySelector('.container');
+            container.innerHTML = `
+                <div style="text-align: center; padding: 60px 20px;">
+                    <div style="font-size: 3rem; margin-bottom: 20px;">🌾</div>
+                    <h2 style="color: var(--primary); margin-bottom: 12px;">Loading Marketplace...</h2>
+                    <p style="color: var(--text-secondary);">Redirecting you to the right place</p>
+                </div>
+            `;
 
-                if (matchesText && matchesCat) {
-                    const card = document.createElement('div');
-                    card.className = "product-card";
-                    const msg = (t.msg_contact_seller || "Contacting seller for {item}...").replace("{item}", displayName);
-                    card.onclick = () => showToast(msg);
-                    card.innerHTML = `
-                        <div class="product-img">${p.icon}</div>
-                        <div class="product-name">${displayName}</div>
-                        <div class="product-price">${p.price} <span class="product-unit">${p.unit}</span></div>
-                    `;
-                    grid.appendChild(card);
+            // Redirect based on user type
+            setTimeout(() => {
+                if (user.user_type === 'farmer') {
+                    window.location.href = '../farmer/my-products.html';
+                } else {
+                    window.location.href = '../customer/browse-products.html';
                 }
-            });
-        }
-
-        let currentCat = "all";
-
-        function filterProducts(text) {
-            renderProducts(text, currentCat);
-        }
-
-        function filterCat(cat, el) {
-            currentCat = cat;
-
-            // Update chip styles
-            document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
-
-            renderProducts("", cat);
-        }
-
-        function openSellModal() {
-            const currentLang = localStorage.getItem('language') || 'en';
-            const t = window.translations[currentLang] || window.translations['en'];
-            showToast(t.msg_seller_portal || "Seller Registration Portal opening...");
-        }
-
-        // Initial Render
-        document.addEventListener('DOMContentLoaded', () => renderProducts());
+            }, 500);
+        });
     </script>
 
 </body>

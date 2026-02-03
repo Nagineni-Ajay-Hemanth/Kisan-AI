@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Kisan AI</title>
+    <link rel="stylesheet" href="../shared/style.css">
+    <script src="../shared/api-client.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s;
+        }
+
+        .order-card:active {
+            transform: scale(0.99);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .order-id {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 1.1rem;
+        }
+
+        .order-date {
+            font-size: 0.8rem;
+            color: #888;
+            font-weight: normal;
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .status-accepted {
+            background: #E3F2FD;
+            color: #1565C0;
+        }
+
+        .status-confirmed {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .status-rejected {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+
+        .status-cancelled {
+            background: #eceff1;
+            color: #78909c;
+        }
+
+        .order-body {
+            display: flex;
+            gap: 16px;
+        }
+
+        .order-icon-box {
+            width: 60px;
+            height: 60px;
+            background: #f5f5f5;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .order-details {
+            flex: 1;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        .product-meta {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .farmer-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 8px;
+            background: #f9f9f9;
+            padding: 8px;
+            border-radius: 6px;
+            width: fit-content;
+        }
+
+        .action-area {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed #e0e0e0;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-pay {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(85, 139, 47, 0.2);
+        }
+
+        .btn-track {
+            background: white;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .info-msg {
+            font-size: 0.85rem;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .msg-warning {
+            background: #fff8e1;
+            color: #f57f17;
+        }
+
+        .msg-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .msg-error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        /* Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-brand">
+            <img src="../shared/assets/icon.png" alt="Kisan AI">
+            <h3>My Orders</h3>
+        </div>
+        <nav class="header-nav">
+            <button class="nav-icon-btn" onclick="window.location.href='../customer-index.html'">
+                <img src="../shared/assets/advice.png" alt="back">
+            </button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div id="ordersContainer">
+            <!-- Skeletons -->
+            <div class="order-card">
+                <div class="header" style="height: 20px; width: 100%; margin-bottom: 20px;"></div>
+                <div style="display: flex; gap: 16px;">
+                    <div class="skeleton" style="width: 60px; height: 60px; border-radius: 12px;"></div>
+                    <div style="flex: 1;">
+                        <div class="skeleton" style="height: 16px; width: 60%; margin-bottom: 8px;"></div>
+                        <div class="skeleton" style="height: 14px; width: 40%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="emptyState"
+            style="text-align: center; padding: 60px 20px; color: var(--text-secondary); display: none;">
+            <div style="font-size: 4rem; opacity: 0.4; margin-bottom: 16px;">📦</div>
+            <h3>No Orders Yet</h3>
+            <p>Browse products and place your first order directly from farmers!</p>
+            <button class="btn-primary" onclick="window.location.href='browse-products.html'"
+                style="margin-top: 24px; width: auto; display: inline-flex;">
+                Find Fresh Produce
+            </button>
+        </div>
+    </div>
+
+    <script>
+        SessionManager.requireAuth();
+        const user = SessionManager.getUser();
+
+        if (user.user_type !== 'customer') {
+            window.location.href = '../index.html';
+        }
+
+        async function loadOrders() {
+            try {
+                const data = await KisanAIApi.getCustomerOrders(user.id);
+
+                const container = document.getElementById('ordersContainer');
+                const emptyState = document.getElementById('emptyState');
+
+                if (data.orders.length === 0) {
+                    container.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+                container.innerHTML = data.orders.map(order => renderOrderCard(order)).join('');
+
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                document.getElementById('ordersContainer').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #d32f2f;">
+                        <p>Failed to load orders: ${error.message}</p>
+                        <button class="btn-secondary" onclick="loadOrders()" style="margin-top: 10px; width: auto;">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        function renderOrderCard(order) {
+            const date = new Date(order.created_at).toLocaleDateString();
+
+            let statusAction = '';
+
+            if (order.status === 'pending') {
+                statusAction = `
+                    <div class="info-msg msg-warning">
+                        <span>⏳ Waiting for farmer acceptance</span>
+                    </div>
+                `;
+            } else if (order.status === 'accepted') {
+                statusAction = `
+                    <div class="action-area">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: 500;">
+                            <span>Total (incl. delivery):</span>
+                            <span style="color: var(--primary); font-weight: 700;">₹${order.total_price}</span>
+                        </div>
+                        <button class="btn-action btn-pay" onclick="proceedToPayment(${order.id}, ${order.total_price}, ${order.delivery_charge})">
+                            Pay Now & Confirm
+                        </button>
+                    </div>
+                `;
+            } else if (order.status === 'confirmed') {
+                statusAction = `
+                    <div class="info-msg msg-success">
+                        <span>✅ Order Confirmed. Preparing for delivery.</span>
+                    </div>
+                    <div class="action-area">
+                         <a href="tel:${order.farmer_mobile}" class="btn-action btn-track">
+                            📞 Call Farmer
+                        </a>
+                    </div>
+                `;
+            } else if (order.status === 'rejected') {
+                statusAction = `
+                    <div class="info-msg msg-error">
+                        <span>❌ Order rejected by farmer.</span>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">Order #${order.id}</div>
+                            <div class="order-date">${date}</div>
+                        </div>
+                        <span class="status-badge status-${order.status}">${order.status}</span>
+                    </div>
+                    
+                    <div class="order-body">
+                        <div class="order-icon-box">📦</div>
+                        <div class="order-details">
+                            <div class="product-name">${order.product_name}</div>
+                            <div class="product-meta">
+                                ${order.quantity} ${order.unit} • ₹${order.product_price}
+                            </div>
+                            
+                            <div class="farmer-info">
+                                👨‍🌾 ${order.farmer_name}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${statusAction}
+                </div>
+            `;
+        }
+
+        function proceedToPayment(orderId, totalPrice, deliveryCharge) {
+            window.location.href = `payment.html?order_id=${orderId}&total=${totalPrice}&delivery=${deliveryCharge}`;
+        }
+
+        // Initial load
+        loadOrders();
+
+        // Auto-refresh every 15 seconds to check for status updates
+        setInterval(loadOrders, 15000);
+    </script>
+</body>
+
+</html>

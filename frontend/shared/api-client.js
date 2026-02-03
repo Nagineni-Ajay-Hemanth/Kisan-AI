@@ -6,29 +6,28 @@
 // Configuration Loader - Fetches config from GitHub
 class ConfigLoader {
     static GITHUB_CONFIG_URL = "https://raw.githubusercontent.com/Nagineni-Ajay-Hemanth/Kisan-AI/main/config.json";
-    static CACHE_KEY = "farmx_config_cache";
-    static CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache
+    static LOCAL_CONFIG_URL = "config.json"; // Local fallback in assets
 
     static async loadConfig() {
+        // Try GitHub first
         try {
-            // Check cache first
-            const cached = this.getCachedConfig();
-            if (cached) {
-                console.log("✓ Using cached config from GitHub");
-                return cached;
-            }
-
-            // Fetch from GitHub
             console.log("⟳ Fetching fresh config from GitHub...");
             const response = await fetch(this.GITHUB_CONFIG_URL, {
                 cache: 'no-cache',
                 headers: {
-                    'Cache-Control': 'no-cache'
+                    'Cache-Control': 'no-cache',
+                    'Accept': 'application/json'
                 }
             });
 
             if (!response.ok) {
-                throw new Error(`GitHub config fetch failed: ${response.status}`);
+                throw new Error(`GitHub fetch failed: ${response.status} ${response.statusText}`);
+            }
+
+            // Check if response is actually JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('GitHub returned HTML instead of JSON');
             }
 
             const config = await response.json();
@@ -38,46 +37,31 @@ class ConfigLoader {
                 throw new Error("Invalid config: API_URL missing");
             }
 
-            // Cache the config
-            this.cacheConfig(config);
             console.log("✓ Config loaded from GitHub:", config);
             return config;
 
-        } catch (error) {
-            console.warn("⚠ Failed to load config from GitHub:", error.message);
-            console.log("→ Falling back to default localhost config");
-            return this.getDefaultConfig();
-        }
-    }
+        } catch (githubError) {
+            console.warn("⚠ GitHub fetch failed:", githubError.message);
 
-    static getCachedConfig() {
-        try {
-            const cached = localStorage.getItem(this.CACHE_KEY);
-            if (!cached) return null;
+            // Try local config.json file
+            try {
+                console.log("⟳ Trying local config.json...");
+                const response = await fetch(this.LOCAL_CONFIG_URL);
 
-            const { config, timestamp } = JSON.parse(cached);
-            const age = Date.now() - timestamp;
-
-            if (age < this.CACHE_TTL) {
-                return config;
+                if (response.ok) {
+                    const config = await response.json();
+                    if (config.API_URL) {
+                        console.log("✓ Config loaded from local file:", config);
+                        return config;
+                    }
+                }
+            } catch (localError) {
+                console.warn("⚠ Local config fetch failed:", localError.message);
             }
 
-            // Cache expired
-            localStorage.removeItem(this.CACHE_KEY);
-            return null;
-        } catch (error) {
-            return null;
-        }
-    }
-
-    static cacheConfig(config) {
-        try {
-            localStorage.setItem(this.CACHE_KEY, JSON.stringify({
-                config,
-                timestamp: Date.now()
-            }));
-        } catch (error) {
-            console.warn("Failed to cache config:", error);
+            // Final fallback to localhost
+            console.log("→ Using default localhost config");
+            return this.getDefaultConfig();
         }
     }
 

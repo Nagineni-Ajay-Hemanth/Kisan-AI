@@ -333,31 +333,58 @@ header {
 
 /* ================= FOOTER NAV ================= */
 .bottom-nav {
-    display: none !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 8px 16px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-
-
 .nav-item {
-    padding: 10px;
-    border-radius: 50%;
-    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: var(--text-secondary);
+    min-width: 60px;
 }
 
 .nav-item img {
     width: 24px;
     height: 24px;
-    display: block;
+    margin-bottom: 4px;
+    opacity: 0.6;
+    transition: all 0.2s;
+}
+
+.nav-item span {
+    font-size: 0.7rem;
+    font-weight: 600;
 }
 
 .nav-item:hover,
 .nav-item.active {
-    background-color: var(--primary);
+    background-color: transparent;
+    color: var(--primary);
 }
 
 .nav-item:hover img,
 .nav-item.active img {
-    filter: brightness(0) invert(1);
+    opacity: 1;
+    transform: translateY(-2px);
+    filter: none; /* Removed invert for cleaner look, just opacity/scale */
 }
 
 /* ================= AUTH FORMS ================= */
